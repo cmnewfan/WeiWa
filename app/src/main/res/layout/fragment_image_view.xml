@@ -1,0 +1,53 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    xmlns:fresco="http://schemas.android.com/apk/res-auto"
+    tools:context="com.weiwa.ljl.weiwa.ImageViewFragment">
+
+    <!-- TODO: Update blank fragment layout -->
+    <RelativeLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center">
+            <TextView
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:id="@+id/progress_text"
+                android:textSize="20dp"
+                android:gravity="center" />
+        </RelativeLayout>
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="right"
+            android:id="@+id/image_fragment_r_layout">
+            <ImageButton
+                android:paddingRight="5dp"
+                android:paddingTop="5dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@android:drawable/ic_menu_share"
+                android:id="@+id/button_share"
+                android:background="@null"/>
+        </RelativeLayout>
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:scrollbarAlwaysDrawVerticalTrack="true"
+            android:layout_below="@id/image_fragment_r_layout">
+            <com.weiwa.ljl.weiwa.CustomImageView
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:id="@+id/simple_view"
+                android:scrollbars="vertical|horizontal"
+                android:scrollbarAlwaysDrawVerticalTrack="true"
+                android:scrollIndicators="right"
+                android:adjustViewBounds="true"
+                android:scaleType="fitCenter" />
+        </ScrollView>
+    </RelativeLayout>
+</FrameLayout>
