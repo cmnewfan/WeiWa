@@ -33,7 +33,6 @@ import com.bumptech.glide.request.FutureTarget;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
-import com.weiwa.ljl.weiwa.Helper.ShareHelper;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -52,6 +51,7 @@ import javax.microedition.khronos.opengles.GL10;
 import javax.microedition.khronos.opengles.GL11;
 
 import retrofit2.http.Url;
+import uk.co.senab.photoview.PhotoViewAttacher;
 
 
 /**
@@ -80,6 +80,7 @@ public class ImageViewFragment extends Fragment {
     private ImageButton mShareButton;
     private Uri[] uris;
     private int currentIndex = 0;
+    private Matrix lastMatrix;
     private float downX = 0;
     private float downY = 0;
     private int[] initPoint;
@@ -92,6 +93,7 @@ public class ImageViewFragment extends Fragment {
     private float lastScale=1.0f;
     private Boolean isGif = true;
     private OnFragmentInteractionListener mListener;
+    private PhotoViewAttacher attacher;
 
     public ImageViewFragment() {
         // Required empty public constructor
@@ -152,7 +154,9 @@ public class ImageViewFragment extends Fragment {
         mProgressText = (TextView) mView.findViewById(R.id.progress_text);
         mProgressText.setText(currentIndex+1+"/"+uris.length);
         mSimpleView.setOverScrollMode(View.OVER_SCROLL_NEVER);
-        mSimpleView.setOnTouchListener(new View.OnTouchListener() {
+        attacher = new PhotoViewAttacher(mSimpleView);
+        attacher.setAllowParentInterceptOnEdge(true);
+        /*mSimpleView.setOnTouchListener(new View.OnTouchListener() {
             @Override
             public boolean onTouch(View v, MotionEvent event) {
                 //recognize gesture
@@ -165,23 +169,17 @@ public class ImageViewFragment extends Fragment {
                 switch(event.getAction()){
                     case MotionEvent.ACTION_DOWN:
                         if(event.getPointerCount()==1) {
-                            if(DoubleTapMode) {
-                                initPoint = new int[2];
-                                mSimpleView.getLocationOnScreen(initPoint);
-                                endPoint = -initPoint[1]+mSimpleView.getDrawable().getIntrinsicWidth();
-                                topPoint = initPoint[1];
-                                downX = event.getRawX();
-                                downY = event.getRawY();
-                            }else {
-                                downX = event.getRawX();
-                                downY = event.getRawY();
-                            }
+                            downX = event.getRawX();
+                            downY = event.getRawY();
                         }else{
-                            Toast.makeText(getActivity(),"请使用单指进行操作",Toast.LENGTH_SHORT).show();
+                            return false;
                         }
-                        return true;
+                        return false;
                     case MotionEvent.ACTION_CANCEL:
                     case MotionEvent.ACTION_UP:
+                        if(event.getPointerCount()>1){
+                            return false;
+                        }
                         lastScale = mSimpleView.getScaleX();
                         if(mSimpleView.getScaleX()!=1 || mSimpleView.getScaleY()!=1){
                             return mSimpleView.onTouchEvent(event);
@@ -203,7 +201,7 @@ public class ImageViewFragment extends Fragment {
                                     }
                                     mProgressText.setText(currentIndex+1+"/"+uris.length);
                                 }
-                                return true;
+                                return false;
                             } else if (downX - upX > 60) {
                                 if (currentIndex == uris.length-1) {
                                     Toast.makeText(getActivity(), "已到最后一张图片", Toast.LENGTH_SHORT).show();
@@ -217,16 +215,16 @@ public class ImageViewFragment extends Fragment {
                                     }
                                     mProgressText.setText(currentIndex+1+"/"+uris.length);
                                 }
-                                return true;
+                                return false;
                             }
                         } else {
                             Toast.makeText(getActivity(), "Y轴变动太大", Toast.LENGTH_SHORT).show();
-                            return true;
+                            return false;
                         }
                 }
                 return false;
             }
-        });
+        });*/
         if(isGif(uris[currentIndex])){
             try {
                 LoadGlideImage(uris[currentIndex]);
@@ -396,6 +394,7 @@ public class ImageViewFragment extends Fragment {
             }else {
                 mSimpleView.setImageBitmap(result);
             }
+            attacher.update();
             mSimpleView.invalidate();
         }
     }

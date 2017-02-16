@@ -40,10 +40,13 @@ public class MainActivity extends AppCompatActivity {
     private FragmentManager fragmentManager;
     private int back_count=0;
     private String weibo_max_id;
+    private String weibo_user_max_id;
     private boolean isLastOne=false;
+    private boolean isUserLastOne=false;
     private String weibo_since_id;
     private WeiboPojo currentWeibo;
     private onWeiboUpdatedListener onWeiboPOJOUpdated;
+    private OnUserUpdatedListener onUserUpdatedListener;
     private MainFragment mMainFragment;
     private FloatingActionButton fab;
     private WeiboClient.ApiStores apiStores;
@@ -51,8 +54,8 @@ public class MainActivity extends AppCompatActivity {
     private final static int WEIBO_GET_NEW = 0;
     private final static int WEIBO_GET_NEXT = 1;
     private final static int WEIBO_GET_COMMENT = 2;
-    private final static int WEIBO_COMMENT = 3;
-    private final static int WEIBO_REPOST = 4;
+    private final static int WEIBO_GET_USER_NEW = 3;
+    private final static int WEIBO_GET_USER_NEXT = 4;
     public static String token;
     public static final String APP_KEY = "1492233661"; // 应用的APP_KEY
     public static final String REDIRECT_URL = "https://api.weibo.com/oauth2/default.html";// 应用的回调页
@@ -73,7 +76,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 weibo_max_id = null;
-                getWeiboData(WEIBO_GET_NEW);
+                getWeiboData(WEIBO_GET_NEW,null);
             }
         });
         //Auth for weibo
@@ -83,11 +86,15 @@ public class MainActivity extends AppCompatActivity {
                 .setDecodeFormat(DecodeFormat.PREFER_ARGB_8888);
         mMainFragment = new MainFragment();
         setDefaultFragment();
-        getWeiboData(WEIBO_GET_NEW);
+        getWeiboData(WEIBO_GET_NEW,null);
     }
 
     public void setOnWeiboPOJOUpdated(onWeiboUpdatedListener listener){
         this.onWeiboPOJOUpdated = listener;
+    }
+
+    public void setOnUserUpdatedListener(OnUserUpdatedListener listener){
+        this.onUserUpdatedListener = listener;
     }
 
     private void initAuth(){
@@ -113,11 +120,27 @@ public class MainActivity extends AppCompatActivity {
     public void setFragment(Fragment currentFragment, Fragment fragment) {
         fab.setVisibility(View.GONE);
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        fragmentTransaction.hide(currentFragment);
-        fragmentTransaction.add(R.id.main_fragment,fragment);
+        //fragmentTransaction.hide(currentFragment);
+        //fragmentTransaction.add(R.id.main_fragment,fragment);
+        fragmentTransaction.replace(R.id.main_fragment,fragment);
         fragmentTransaction.addToBackStack(null);
         fragmentTransaction.commit();
         fabStatus.push(false);
+    }
+
+    public void setFragment(Fragment fragment){
+        if(fragment.getClass().isInstance(UserViewFragment.class)){
+            fab.setVisibility(View.VISIBLE);
+            fabStatus.push(true);
+        }else{
+            fab.setVisibility(View.GONE);
+            fabStatus.push(false);
+        }
+        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
+        fragmentTransaction.hide(getFragmentManager().findFragmentById(R.id.main_fragment));
+        fragmentTransaction.add(R.id.main_fragment,fragment);
+        fragmentTransaction.addToBackStack(null);
+        fragmentTransaction.commit();
     }
 
     @Override
@@ -166,6 +189,9 @@ public class MainActivity extends AppCompatActivity {
                 }
             } else{
                 fragmentManager.popBackStack();
+                if(fragmentManager.findFragmentById(R.id.main_fragment).isHidden()){
+                    fragmentManager.beginTransaction().show(fragmentManager.findFragmentById(R.id.main_fragment)).commit();
+                }
                 if(fabStatus.size()>1){
                     fabStatus.pop();
                     if(fabStatus.lastElement()){
@@ -180,7 +206,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void getWeiboData(){
-        getWeiboData(WEIBO_GET_NEXT);
+        getWeiboData(WEIBO_GET_NEXT,null);
     }
 
     public void getWeiboComment(String id){
@@ -202,6 +228,7 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onFailure(Throwable t) {
                 //do nothing
+                Toast.makeText(MainActivity.this,t.getMessage(),Toast.LENGTH_SHORT).show();
                 Log.e("",t.getMessage());
             }
         });
@@ -255,7 +282,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void getWeiboData(final int updateType) {
+    public void getWeiboData(final int updateType, final String user_id) {
         Call<WeiboPojo> call = null;
         if(apiStores == null){
             apiStores = WeiboClient.retrofit().create(WeiboClient.ApiStores.class);
@@ -270,6 +297,10 @@ public class MainActivity extends AppCompatActivity {
                     call = apiStores.getWeiboData(MainActivity.token, weibo_max_id);
                 }
                 break;
+            case WEIBO_GET_USER_NEW:
+                call = apiStores.getUserWeiboData(MainActivity.token, user_id);
+                isUserLastOne = false;
+                break;
             default:
                 break;
         }
@@ -281,18 +312,40 @@ public class MainActivity extends AppCompatActivity {
                     if (currentWeibo == null) {
                         Toast.makeText(MainActivity.this, "请先验证微博用户", Toast.LENGTH_SHORT).show();
                     } else {
-                        if (weibo_max_id != null && !weibo_max_id.equals("")) {
-                            long last_id = Long.parseLong(currentWeibo.getMax_id());
-                            long init_id = Long.parseLong(weibo_max_id);
-                            if (init_id < last_id) {
-                                Toast.makeText(MainActivity.this, String.valueOf(last_id) + "  " + String.valueOf(init_id), Toast.LENGTH_SHORT).show();
-                                isLastOne = true;
-                                return;
-                            }
+                        switch (updateType){
+                            case WEIBO_GET_NEXT:
+                            case WEIBO_GET_NEW:
+                                if (weibo_max_id != null && !weibo_max_id.equals("")) {
+                                    long last_id = Long.parseLong(currentWeibo.getMax_id());
+                                    long init_id = Long.parseLong(weibo_max_id);
+                                    if (init_id < last_id) {
+                                        Toast.makeText(MainActivity.this, String.valueOf(last_id) + "  " + String.valueOf(init_id), Toast.LENGTH_SHORT).show();
+                                        isLastOne = true;
+                                        return;
+                                    }
+                                }
+                                weibo_max_id = currentWeibo.getMax_id();
+                                Toast.makeText(MainActivity.this, String.valueOf(response.body().getStatuses().length), Toast.LENGTH_SHORT).show();
+                                onWeiboPOJOUpdated.onUpdate(currentWeibo, updateType);
+                                break;
+                            case WEIBO_GET_USER_NEW:
+                            case WEIBO_GET_USER_NEXT:
+                                if (weibo_user_max_id != null && !weibo_user_max_id.equals("")) {
+                                    long last_id = Long.parseLong(currentWeibo.getMax_id());
+                                    long init_id = Long.parseLong(weibo_max_id);
+                                    if (init_id < last_id) {
+                                        Toast.makeText(MainActivity.this, String.valueOf(last_id) + "  " + String.valueOf(init_id), Toast.LENGTH_SHORT).show();
+                                        isUserLastOne = true;
+                                        return;
+                                    }
+                                }
+                                weibo_user_max_id = currentWeibo.getMax_id();
+                                Toast.makeText(MainActivity.this, String.valueOf(response.body().getStatuses().length), Toast.LENGTH_SHORT).show();
+                                onUserUpdatedListener.onUpdate(currentWeibo, updateType);
+                                break;
+                             default:
+                                break;
                         }
-                        weibo_max_id = currentWeibo.getMax_id();
-                        Toast.makeText(MainActivity.this, String.valueOf(response.body().getStatuses().length), Toast.LENGTH_SHORT).show();
-                        onWeiboPOJOUpdated.onUpdate(currentWeibo, updateType);
                     }
                 }
 

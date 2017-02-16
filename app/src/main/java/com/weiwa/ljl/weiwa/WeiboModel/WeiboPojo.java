@@ -1,6 +1,9 @@
 package com.weiwa.ljl.weiwa.WeiboModel;
 
 import android.net.Uri;
+import android.os.Bundle;
+import android.os.Parcel;
+import android.os.Parcelable;
 
 /**
  * Created by hzfd on 2017/1/17.
@@ -1334,6 +1337,7 @@ public class WeiboPojo {
         {
             this.block_word = block_word;
         }
+
     }
     class Visible{
         private String type;

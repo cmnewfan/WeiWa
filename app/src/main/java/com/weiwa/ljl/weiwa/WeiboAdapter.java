@@ -26,6 +26,7 @@ import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.PopupWindow;
@@ -48,7 +49,6 @@ public class WeiboAdapter extends RecyclerView.Adapter {
 
     private WeiboPojo weibo_data;
     private Fragment mContext;
-    private DisplayMetrics mDisplayMetrics;
     private final int SINGLE_WB = 0;
     private final int RETWEETED_WB = 1;
     private onAdapterEvent onNeedInsert;
@@ -77,23 +77,25 @@ public class WeiboAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
-        holder.itemView.setOnClickListener(new View.OnClickListener() {
+        /*holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onNeedInsert.onNeedComment(weibo_data.getStatuses()[position].getId());
             }
-        });
+        });*/
         switch (holder.getItemViewType()){
             case SINGLE_WB:
                 SingleWB_ViewHolder single_item = (SingleWB_ViewHolder) holder;
                 single_item.refresh(weibo_data.getStatuses()[position]);
                 single_item.setId(weibo_data.getStatuses()[position].getId());
+                single_item.setUser(weibo_data.getStatuses()[position].getUser());
                 break;
             case RETWEETED_WB:
                 Retweeted_ViewHolder retweet_item = (Retweeted_ViewHolder) holder;
                 retweet_item.refresh(weibo_data.getStatuses()[position]);
                 retweet_item.setRetweetId(weibo_data.getStatuses()[position].getId());
                 retweet_item.setId(weibo_data.getStatuses()[position].getRetweeted_status().getId());
+                retweet_item.setUser(weibo_data.getStatuses()[position].getUser(),weibo_data.getStatuses()[position].getRetweeted_status().getUser());
                 break;
             default:
                 break;
@@ -111,7 +113,6 @@ public class WeiboAdapter extends RecyclerView.Adapter {
     public WeiboAdapter(WeiboPojo weibo_pojo, Fragment context, onAdapterEvent onNeed){
         this.weibo_data = weibo_pojo;
         this.mContext = context;
-        this.mDisplayMetrics = mContext.getResources().getDisplayMetrics();
         this.onNeedInsert = onNeed;
     }
 
@@ -135,8 +136,8 @@ public class WeiboAdapter extends RecyclerView.Adapter {
 class Retweeted_ViewHolder extends CustomViewHolder{
     TextView retweet_user;
     TextView retweeted_user;
-    ImageView retweet_user_portrait;
-    ImageView retweeted_user_portrait;
+    PortraitView retweet_user_portrait;
+    PortraitView retweeted_user_portrait;
     TextView retweet_text;
     TextView retweet_date;
     TextView retweeted_text;
@@ -147,6 +148,7 @@ class Retweeted_ViewHolder extends CustomViewHolder{
     LinearLayout retweeted_line_2;
     LinearLayout retweeted_line_3;
     String retweet_id;
+    ImageButton option;
     public Retweeted_ViewHolder(View itemView,Fragment context, onAdapterEvent event) {
         super(itemView,context,event);
         initView(itemView);
@@ -164,8 +166,8 @@ class Retweeted_ViewHolder extends CustomViewHolder{
     private void initView(View itemView) {
         retweeted_user = (TextView) itemView.findViewById(R.id.retweeted_user);
         retweet_user = (TextView) itemView.findViewById(R.id.retweet_user);
-        retweet_user_portrait = (ImageView) itemView.findViewById(R.id.retweet_user_portrait);
-        retweeted_user_portrait = (ImageView) itemView.findViewById(R.id.retweeted_user_portrait);
+        retweet_user_portrait = (PortraitView) itemView.findViewById(R.id.retweet_user_portrait);
+        retweeted_user_portrait = (PortraitView) itemView.findViewById(R.id.retweeted_user_portrait);
         retweet_text = (TextView) itemView.findViewById(R.id.retweet_weibo_text);
         retweet_date = (TextView) itemView.findViewById(R.id.retweet_weibo_date);
         retweeted_text = (TextView) itemView.findViewById(R.id.retweeted_weibo_text);
@@ -175,6 +177,7 @@ class Retweeted_ViewHolder extends CustomViewHolder{
         retweeted_line_1 = (LinearLayout) itemView.findViewById(R.id.retweeted_weibo_image_line_1);
         retweeted_line_2 = (LinearLayout) itemView.findViewById(R.id.retweeted_weibo_image_line_2);
         retweeted_line_3 = (LinearLayout) itemView.findViewById(R.id.retweeted_weibo_image_line_3);
+        option = (ImageButton) itemView.findViewById(R.id.option);
     }
 
     public void refresh(final WeiboPojo.Statuses statuses){
@@ -183,38 +186,26 @@ class Retweeted_ViewHolder extends CustomViewHolder{
         this.retweeted_date.setText(statuses.getRetweeted_status().getCreated_at());
         this.retweeted_text.setText(statuses.getRetweeted_status().getText());
         this.retweet_user.setText(statuses.getUser().getName());
-        retweet_user.setOnTouchListener(new View.OnTouchListener() {
+        this.option.setOnClickListener(new View.OnClickListener() {
             @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                final int DRAWABLE_LEFT = 0;
-                final int DRAWABLE_TOP = 1;
-                final int DRAWABLE_RIGHT = 2;
-                final int DRAWABLE_BOTTOM = 3;
-                int motionEvent = event.getAction();
-                if (motionEvent == MotionEvent.ACTION_UP || motionEvent == MotionEvent.ACTION_DOWN) {
-                    if (event.getRawX() >= (v.getRight() - ((TextView) v).getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                        // your action here
-                        PopupMenu popupMenu = new PopupMenu(getContext().getActivity(),retweet_user,Gravity.RIGHT);
-                        popupMenu.inflate(R.menu.menu_weibo);
-                        popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                            @Override
-                            public boolean onMenuItemClick(MenuItem item) {
-                                switch (item.getItemId()){
-                                    case R.id.comment_this:
-                                        createPopupWindow(PopupWindow_Comment,null,null,retweet_id).showAtLocation(retweet_user,Gravity.CENTER,0,0);
-                                        break;
-                                    case R.id.repost_this:
-                                        createPopupWindow(PopupWindow_Repost,retweet_user.getText().toString(),retweet_text.getText().toString(),null).showAtLocation(retweet_user,Gravity.CENTER,0,0);
-                                        break;
-                                }
-                                return false;
-                            }
-                        });
-                        popupMenu.show();
+            public void onClick(View v) {
+                final PopupMenu popupMenu = new PopupMenu(getContext().getActivity(),option);
+                popupMenu.inflate(R.menu.menu_weibo);
+                popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                    @Override
+                    public boolean onMenuItemClick(MenuItem item) {
+                        switch (item.getItemId()){
+                            case R.id.comment_this:
+                                createPopupWindow(PopupWindow_Comment,null,null,retweet_id).showAtLocation(retweet_user,Gravity.CENTER,0,0);
+                                break;
+                            case R.id.repost_this:
+                                createPopupWindow(PopupWindow_Repost,retweet_user.getText().toString(),retweet_text.getText().toString(),null).showAtLocation(retweet_user,Gravity.CENTER,0,0);
+                                break;
+                        }
                         return true;
                     }
-                }
-                return false;
+                });
+                popupMenu.show();
             }
         });
         this.retweeted_user.setText(statuses.getRetweeted_status().getUser().getName());
@@ -228,11 +219,16 @@ class Retweeted_ViewHolder extends CustomViewHolder{
     public void setId(String w_id){
         id = w_id;
     }
+
+    public void setUser(WeiboPojo.User repostUser, WeiboPojo.User repostedUser){
+        retweeted_user_portrait.setData((MainActivity) getContext().getActivity(),repostedUser);
+        retweet_user_portrait.setData((MainActivity) getContext().getActivity(),repostUser);
+    }
 }
 
  class SingleWB_ViewHolder extends CustomViewHolder {
     TextView user_name;
-    ImageView user_portrait;
+    PortraitView user_portrait;
     TextView text;
     TextView date;
     TextView repost;
@@ -240,6 +236,8 @@ class Retweeted_ViewHolder extends CustomViewHolder{
     LinearLayout line_1;
     LinearLayout line_2;
     LinearLayout line_3;
+     WeiboPojo.User user;
+     ImageButton option;
     public SingleWB_ViewHolder(View itemView,Fragment context, onAdapterEvent event) {
         super(itemView,context,event);
         initView(itemView);
@@ -252,43 +250,32 @@ class Retweeted_ViewHolder extends CustomViewHolder{
 
      private void initView(View itemView) {
          user_name = (TextView) itemView.findViewById(R.id.single_user);
-         user_name.setOnTouchListener(new View.OnTouchListener() {
+         option = (ImageButton) itemView.findViewById(R.id.option);
+         option.setOnClickListener(new View.OnClickListener() {
              @Override
-             public boolean onTouch(View v, MotionEvent event) {
-                 final int DRAWABLE_LEFT = 0;
-                 final int DRAWABLE_TOP = 1;
-                 final int DRAWABLE_RIGHT = 2;
-                 final int DRAWABLE_BOTTOM = 3;
-                 int motionEvent = event.getAction();
-                 if (motionEvent == MotionEvent.ACTION_UP || motionEvent == MotionEvent.ACTION_DOWN) {
-                     if (event.getRawX() >= (v.getRight() - ((TextView) v).getCompoundDrawables()[DRAWABLE_RIGHT].getBounds().width())) {
-                         // your action here
-                         PopupMenu popupMenu = new PopupMenu(getContext().getActivity(),user_name, Gravity.RIGHT);
-                         popupMenu.inflate(R.menu.menu_weibo);
-                         popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
-                             @Override
-                             public boolean onMenuItemClick(MenuItem item) {
-                                 switch (item.getItemId()){
-                                     case R.id.comment_this:
-                                         createPopupWindow(PopupWindow_Comment,null,null,null).showAtLocation(user_name,Gravity.CENTER,0,0);
-                                         break;
-                                     case R.id.repost_this:
-                                         createPopupWindow(PopupWindow_Repost,null,null,null).showAtLocation(user_name,Gravity.CENTER,0,0);
-                                         break;
-                                     default:
-                                         break;
-                                 }
-                                 return false;
-                             }
-                         });
-                         popupMenu.show();
+             public void onClick(View v) {
+                 final PopupMenu popupMenu = new PopupMenu(getContext().getActivity(),option);
+                 popupMenu.inflate(R.menu.menu_weibo);
+                 popupMenu.setOnMenuItemClickListener(new PopupMenu.OnMenuItemClickListener() {
+                     @Override
+                     public boolean onMenuItemClick(MenuItem item) {
+                         switch (item.getItemId()){
+                             case R.id.comment_this:
+                                 createPopupWindow(PopupWindow_Comment,null,null,null).showAtLocation(user_name,Gravity.CENTER,0,0);
+                                 break;
+                             case R.id.repost_this:
+                                 createPopupWindow(PopupWindow_Repost,null,null,null).showAtLocation(user_name,Gravity.CENTER,0,0);
+                                 break;
+                             default:
+                                 break;
+                         }
                          return true;
                      }
-                 }
-                 return false;
+                 });
+                 popupMenu.show();
              }
          });
-         user_portrait = (ImageView) itemView.findViewById(R.id.single_user_portrait);
+         user_portrait = (PortraitView) itemView.findViewById(R.id.single_user_portrait);
          text = (TextView) itemView.findViewById(R.id.weibo_text);
          date = (TextView) itemView.findViewById(R.id.weibo_date);
          repost = (TextView) itemView.findViewById(R.id.weibo_repost_count);
@@ -327,6 +314,10 @@ class Retweeted_ViewHolder extends CustomViewHolder{
      public void setRepostUnderline(){
          repost.setPaintFlags(repost.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
          comment.setPaintFlags(comment.getPaintFlags() & (~ Paint.STRIKE_THRU_TEXT_FLAG));
+     }
+
+     public void setUser(WeiboPojo.User wUser){
+         user_portrait.setData((MainActivity) getContext().getActivity(),wUser);
      }
 
 
@@ -383,12 +374,13 @@ class CustomViewHolder extends RecyclerView.ViewHolder {
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
                     public void onClick(View v) {
-                        ImageViewFragment fragment = new ImageViewFragment();
+                        //ImageViewFragment fragment = new ImageViewFragment();
+                        ImageFragment fragment = new ImageFragment();
                         Bundle bundle = new Bundle();
                         bundle.putParcelableArray("Uris",convert_uris);
                         bundle.putInt("Index",index);
                         fragment.setArguments(bundle);
-                        ((MainActivity)mContext.getActivity()).setFragment(mContext,fragment);
+                        ((MainActivity)mContext.getActivity()).setFragment(fragment);
                     }
                 });
                 imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
@@ -488,7 +480,6 @@ class CustomViewHolder extends RecyclerView.ViewHolder {
             }
         });
         popupWindow.setContentView(view);
-        popupWindow.setFocusable(true);
         popupWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT);
         popupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
         popupWindow.setBackgroundDrawable(getContext().getActivity().getResources().getDrawable(R.drawable.popupwindow_drawable));

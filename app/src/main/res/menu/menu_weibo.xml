@@ -1,9 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.weiwa.ljl.weiwa.MainActivity">
     <item
         android:id="@+id/comment_this"
-        android:title="@string/comment_this" />
+        android:orderInCategory="100"
+        android:title="@string/comment_this"
+        app:showAsAction="never"/>
     <item
         android:id="@+id/repost_this"
-        android:title="@string/repost_this" />
+        android:orderInCategory="100"
+        android:title="@string/repost_this"
+        app:showAsAction="never"/>
 </menu>

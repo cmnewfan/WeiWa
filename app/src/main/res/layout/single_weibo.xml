@@ -16,7 +16,7 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:orientation="horizontal">
-        <ImageView
+        <com.weiwa.ljl.weiwa.PortraitView
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:paddingLeft="5dp"
@@ -26,13 +26,28 @@
         <RelativeLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent">
+
             <TextView
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="30dp"
                 android:paddingLeft="3dp"
                 android:layout_gravity="center"
-                android:id="@+id/single_user"
-                android:drawableRight="@drawable/ic_menu"/>
+                android:id="@+id/single_user" />
+
+            <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="30dp"
+                android:layout_toRightOf="@id/single_user"
+                android:gravity="right">
+                <ImageButton
+                    android:layout_width="30dp"
+                    android:layout_height="30dp"
+                    android:src="@drawable/ic_menu"
+                    android:background="@null"
+                    android:id="@+id/option"/>
+            </RelativeLayout>
+
+
             <TextView
                 android:layout_width="match_parent"
                 android:layout_height="30dp"

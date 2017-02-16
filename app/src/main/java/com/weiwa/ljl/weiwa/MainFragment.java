@@ -120,11 +120,11 @@ public class MainFragment extends Fragment {
                 if(comment.getStatus().getRetweeted_status()!=null && comment.getStatus().getRetweeted_status().getId()!=null){
                     WeiboRetweetCommentFragment weiboRetweetCommentFragment = new WeiboRetweetCommentFragment();
                     weiboRetweetCommentFragment.setArguments(bundle);
-                    ((MainActivity)getActivity()).setFragment(MainFragment.this,weiboRetweetCommentFragment);
+                    ((MainActivity)getActivity()).setFragment(weiboRetweetCommentFragment);
                 }else{
                     WeiboCommentFragment weiboCommentFragment = new WeiboCommentFragment();
                     weiboCommentFragment.setArguments(bundle);
-                    ((MainActivity)getActivity()).setFragment(MainFragment.this,weiboCommentFragment);
+                    ((MainActivity)getActivity()).setFragment(weiboCommentFragment);
                 }
             }
         });

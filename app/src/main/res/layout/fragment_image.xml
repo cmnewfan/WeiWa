@@ -2,8 +2,7 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    xmlns:fresco="http://schemas.android.com/apk/res-auto"
-    tools:context="com.weiwa.ljl.weiwa.ImageViewFragment">
+    tools:context="com.weiwa.ljl.weiwa.ImageFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <RelativeLayout
@@ -34,14 +33,13 @@
                 android:id="@+id/button_share"
                 android:background="@null"/>
         </RelativeLayout>
-                <com.weiwa.ljl.weiwa.CustomImageView
-                    android:layout_width="match_parent"
-                    android:layout_height="match_parent"
-                    android:id="@+id/simple_view"
-                    android:scrollbars="vertical|horizontal"
-                    android:scrollbarAlwaysDrawVerticalTrack="true"
-                    android:layout_below="@id/image_fragment_r_layout"
-                    android:adjustViewBounds="true"
-                    android:scaleType="fitCenter" />
+        <com.weiwa.ljl.weiwa.ImageViewPager
+            android:id="@+id/guide_viewpager"
+            android:layout_below="@id/image_fragment_r_layout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+        </com.weiwa.ljl.weiwa.ImageViewPager>
     </RelativeLayout>
+
 </FrameLayout>
