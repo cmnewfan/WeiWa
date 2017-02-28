@@ -2,14 +2,9 @@ package com.weiwa.ljl.weiwa;
 
 import android.app.Fragment;
 import android.content.Context;
-import android.content.res.ColorStateList;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Paint;
-import android.graphics.drawable.ColorDrawable;
-import android.graphics.drawable.Drawable;
-import android.graphics.drawable.ShapeDrawable;
-import android.graphics.drawable.shapes.Shape;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -20,10 +15,8 @@ import android.util.Log;
 import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.MenuItem;
-import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.WindowManager;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageButton;
@@ -77,12 +70,12 @@ public class WeiboAdapter extends RecyclerView.Adapter {
 
     @Override
     public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
-        /*holder.itemView.setOnClickListener(new View.OnClickListener() {
+        holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 onNeedInsert.onNeedComment(weibo_data.getStatuses()[position].getId());
             }
-        });*/
+        });
         switch (holder.getItemViewType()){
             case SINGLE_WB:
                 SingleWB_ViewHolder single_item = (SingleWB_ViewHolder) holder;
@@ -367,9 +360,9 @@ class CustomViewHolder extends RecyclerView.ViewHolder {
         line_3.removeAllViews();
         if(urls!=null && urls.length>0){
             int count = 0;
-            for (WeiboPojo.Pic_urls url :
+            for (final WeiboPojo.Pic_urls url :
                     urls) {
-                CustomImageView imageView = new CustomImageView(mContext.getActivity());
+                final CustomImageView imageView = new CustomImageView(mContext.getActivity());
                 final int index = count;
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -383,7 +376,7 @@ class CustomViewHolder extends RecyclerView.ViewHolder {
                         ((MainActivity)mContext.getActivity()).setFragment(fragment);
                     }
                 });
-                imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT, ViewGroup.LayoutParams.WRAP_CONTENT));
+                imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
                 View view = new View(mContext.getActivity());
                 view.setLayoutParams(new ViewGroup.LayoutParams(10, ViewGroup.LayoutParams.MATCH_PARENT));
                 view.setBackground(null);
@@ -400,8 +393,13 @@ class CustomViewHolder extends RecyclerView.ViewHolder {
                     line_3.addView(view);
                     line_3.setVisibility(View.VISIBLE);
                 }
-                ImageDownloader downloader = new ImageDownloader(getContext());
-                downloader.execute(new Object[]{url.getThumbnail_pic(),imageView,urls.length,0});
+                Thread downloadThread = new Thread(){
+                  public void run(){
+                      ImageDownloader downloader = new ImageDownloader(getContext());
+                      downloader.execute(new Object[]{url.getThumbnail_pic(),imageView,urls.length,0});
+                  }
+                };
+                downloadThread.start();
                 count++;
             }
         }
@@ -492,7 +490,8 @@ class ImageDownloader extends AsyncTask<Object,Bitmap,Bitmap>{
     private final DisplayMetrics mDisplayMetrics;
     ImageView view;
     int count;
-    int divider = 80;
+    Boolean isGif = true;
+    int divider = 100;
     int downloadType;
     private final int IMAGE=0;
     private final int PORTRAIT=1;
@@ -504,7 +503,11 @@ class ImageDownloader extends AsyncTask<Object,Bitmap,Bitmap>{
         try{
             //URL myFileURL = new URL(params[0].toString().replace("thumbnail","large"));
             //URL myFileURL = new URL(params[0].toString());
-            URL myFileURL = new URL(params[0].toString().replace("thumbnail","bmiddle"));
+            URL myFileURL = new URL(params[0].toString());
+            if(!params[0].toString().toLowerCase().endsWith(".gif")) {
+                myFileURL = new URL(params[0].toString().replace("thumbnail", "bmiddle"));
+                isGif = false;
+            }
             view = (ImageView) params[1];
             count = (int) params[2];
             downloadType = (int) params[3];
@@ -512,7 +515,7 @@ class ImageDownloader extends AsyncTask<Object,Bitmap,Bitmap>{
                 Log.e("ss","s");
             }
             //if image cached
-            File cachedFile = getCachedImage(WeatherApplication.getFileName(myFileURL));
+            File cachedFile = getCachedImage(WeiwaApplication.getFileName(myFileURL));
             if(cachedFile!=null){
                 Bitmap bitmap = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
                 return bitmap;
@@ -529,7 +532,7 @@ class ImageDownloader extends AsyncTask<Object,Bitmap,Bitmap>{
             //conn.connect();
             //得到数据流
             InputStream is = conn.getInputStream();
-            File downloadFile = new File(WeatherApplication.CacheCategory,WeatherApplication.getFileName(myFileURL));
+            File downloadFile = new File(WeiwaApplication.CacheCategory, WeiwaApplication.getFileName(myFileURL));
             OutputStream os = new FileOutputStream(downloadFile);
             int bytesRead = 0;
             byte[] buffer = new byte[8192];
@@ -552,23 +555,32 @@ class ImageDownloader extends AsyncTask<Object,Bitmap,Bitmap>{
     protected void onPostExecute(Bitmap result) {
         if(downloadType==IMAGE) {
             if (count == 1) {
-                view.getLayoutParams().width = mDisplayMetrics.widthPixels - divider;
+                if(isGif){
+                    view.getLayoutParams().width = (mDisplayMetrics.widthPixels - divider) / 2;
+                } else{
+                    view.getLayoutParams().width = mDisplayMetrics.widthPixels - divider;
+                }
+                view.setScaleType(ImageView.ScaleType.FIT_CENTER);
             } else if (count == 2) {
                 view.getLayoutParams().width = (mDisplayMetrics.widthPixels - divider) / 2;
+                view.setScaleType(ImageView.ScaleType.CENTER_CROP);
             } else {
+                if(view.getLayoutParams()==null){
+                    view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
+                }
                 view.getLayoutParams().width = (mDisplayMetrics.widthPixels - divider) / 3;
+                view.setScaleType(ImageView.ScaleType.CENTER_CROP);
             }
             view.setImageBitmap(result);
         }else if(downloadType==PORTRAIT){
-            int width = view.getLayoutParams().width;
             view.setImageBitmap(result);
         }
     }
 
     private File getCachedImage(String name){
-        if(WeatherApplication.CacheCategory.exists()){
+        if(WeiwaApplication.CacheCategory.exists()){
             for (File file :
-                    WeatherApplication.CacheCategory.listFiles()) {
+                    WeiwaApplication.CacheCategory.listFiles()) {
                 String fileName = file.getName();
                 if (fileName.equals(name)){
                     return file;

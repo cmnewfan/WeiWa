@@ -12,4 +12,11 @@
         android:orderInCategory="100"
         android:title="@string/clear_cache"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/upload"
+        android:orderInCategory="100"
+        android:title="@string/upload"
+        app:showAsAction=""
+        android:icon="@drawable/ic_menu_edit"
+        android:visible="false"/>
 </menu>

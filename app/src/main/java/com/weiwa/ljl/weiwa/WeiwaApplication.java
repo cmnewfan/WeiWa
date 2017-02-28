@@ -9,7 +9,7 @@ import java.net.URL;
 /**
  * Created by hzfd on 2017/2/7.
  */
-public class WeatherApplication {
+public class WeiwaApplication {
     public static File CacheCategory = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Weiwa");
 
     public static String getFileName(Uri uri){

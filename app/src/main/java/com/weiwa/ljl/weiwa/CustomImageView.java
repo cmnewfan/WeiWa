@@ -42,16 +42,6 @@ public class CustomImageView extends ImageView{
                     matrix.postScale(scale,scale);
                     setImageMatrix(matrix);
                 }
-                /*if(getScaleX()==1.0f){
-                    float trueWidth = context.getResources().getDisplayMetrics().widthPixels;
-                    float imageWidth = getDrawable().getIntrinsicWidth();
-                    scale = trueWidth/imageWidth;
-                    setScaleX(scale);
-                    setScaleY(scale);
-                }else{
-                    setScaleX(1.0f);
-                    setScaleY(1.0f);
-                }*/
                 return true;
             }
         });

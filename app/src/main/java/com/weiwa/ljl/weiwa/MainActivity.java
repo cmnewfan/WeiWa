@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.app.Fragment;
 import android.app.FragmentManager;
 import android.app.FragmentTransaction;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
@@ -15,6 +16,9 @@ import android.view.KeyEvent;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.ViewGroup;
+import android.widget.Gallery;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.bumptech.glide.GlideBuilder;
@@ -24,14 +28,17 @@ import com.sina.weibo.sdk.auth.sso.SsoHandler;
 import com.weiwa.ljl.weiwa.WeiboModel.WeiboCommentPojo;
 import com.weiwa.ljl.weiwa.WeiboModel.WeiboPojo;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
+import java.io.File;
+import java.io.IOException;
 import java.util.Stack;
 
-import okhttp3.HttpUrl;
+import okhttp3.MediaType;
+import okhttp3.MultipartBody;
+import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
+import retrofit2.http.Multipart;
 
 public class MainActivity extends AppCompatActivity {
     private AuthInfo mAuthInfo;
@@ -42,6 +49,8 @@ public class MainActivity extends AppCompatActivity {
     private String weibo_max_id;
     private String weibo_user_max_id;
     private boolean isLastOne=false;
+    private ImageButton add;
+    private ImageButton upload;
     private boolean isUserLastOne=false;
     private String weibo_since_id;
     private WeiboPojo currentWeibo;
@@ -56,6 +65,8 @@ public class MainActivity extends AppCompatActivity {
     private final static int WEIBO_GET_COMMENT = 2;
     private final static int WEIBO_GET_USER_NEW = 3;
     private final static int WEIBO_GET_USER_NEXT = 4;
+    private final static int WEIBO_UPDATE_NO_PIC = 5;
+    private final static int WEIBO_UPLOAD_WITH_PIC = 6;
     public static String token;
     public static final String APP_KEY = "1492233661"; // 应用的APP_KEY
     public static final String REDIRECT_URL = "https://api.weibo.com/oauth2/default.html";// 应用的回调页
@@ -69,14 +80,37 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(R.string.app_name);
         setSupportActionBar(toolbar);
-
         fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 weibo_max_id = null;
                 getWeiboData(WEIBO_GET_NEW,null);
+            }
+        });
+        //init Image Button
+        add = (ImageButton) findViewById(R.id.add);
+        upload = (ImageButton) findViewById(R.id.edit);
+        upload.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                EditFragment editFragment = new EditFragment();
+                add.setVisibility(View.VISIBLE);
+                upload.setVisibility(View.GONE);
+                editFragment.setOnPost(new onPost() {
+                    @Override
+                    public void post(String content) {
+                        update(content,null,0,WEIBO_UPDATE_NO_PIC);
+                    }
+
+                    @Override
+                    public void post(String content, byte[] pic) {
+                        update(content,pic,0,WEIBO_UPLOAD_WITH_PIC);
+                    }
+                });
+                setFragment(editFragment);
             }
         });
         //Auth for weibo
@@ -95,6 +129,27 @@ public class MainActivity extends AppCompatActivity {
 
     public void setOnUserUpdatedListener(OnUserUpdatedListener listener){
         this.onUserUpdatedListener = listener;
+    }
+
+    public void setOnAddButtonClickListener(View.OnClickListener listener){
+        add.setOnClickListener(listener);
+    }
+
+    public void popBack(){
+        fragmentManager.popBackStack();
+        add.setVisibility(View.GONE);
+        upload.setVisibility(View.VISIBLE);
+        if(fragmentManager.findFragmentById(R.id.main_fragment).isHidden()){
+            fragmentManager.beginTransaction().show(fragmentManager.findFragmentById(R.id.main_fragment)).commit();
+        }
+        if(fabStatus.size()>1){
+            fabStatus.pop();
+            if(fabStatus.lastElement()){
+                fab.setVisibility(View.VISIBLE);
+            }else{
+                fab.setVisibility(View.GONE);
+            }
+        }
     }
 
     private void initAuth(){
@@ -117,24 +172,22 @@ public class MainActivity extends AppCompatActivity {
         fabStatus.push(true);
     }
 
-    public void setFragment(Fragment currentFragment, Fragment fragment) {
-        fab.setVisibility(View.GONE);
-        FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
-        //fragmentTransaction.hide(currentFragment);
-        //fragmentTransaction.add(R.id.main_fragment,fragment);
-        fragmentTransaction.replace(R.id.main_fragment,fragment);
-        fragmentTransaction.addToBackStack(null);
-        fragmentTransaction.commit();
-        fabStatus.push(false);
-    }
-
     public void setFragment(Fragment fragment){
-        if(fragment.getClass().isInstance(UserViewFragment.class)){
+        if(fragment instanceof UserViewFragment){
             fab.setVisibility(View.VISIBLE);
             fabStatus.push(true);
+            add.setVisibility(View.GONE);
+            upload.setVisibility(View.VISIBLE);
+        }else if(fragment instanceof EditFragment){
+            add.setVisibility(View.VISIBLE);
+            upload.setVisibility(View.GONE);
+            fab.setVisibility(View.GONE);
+            fabStatus.push(false);
         }else{
             fab.setVisibility(View.GONE);
             fabStatus.push(false);
+            add.setVisibility(View.GONE);
+            upload.setVisibility(View.VISIBLE);
         }
         FragmentTransaction fragmentTransaction = getFragmentManager().beginTransaction();
         fragmentTransaction.hide(getFragmentManager().findFragmentById(R.id.main_fragment));
@@ -162,8 +215,11 @@ public class MainActivity extends AppCompatActivity {
                 initAuth();
                 return true;
             case R.id.clear_cache:
-                if(WeatherApplication.CacheCategory.exists()){
-                    WeatherApplication.CacheCategory.delete();
+                if(WeiwaApplication.CacheCategory.exists()){
+                    File[] files = WeiwaApplication.CacheCategory.listFiles();
+                    for(File file : files){
+                        file.delete();
+                    }
                     Toast.makeText(this,"缓存已清除完毕",Toast.LENGTH_SHORT).show();
                 }
         }
@@ -188,18 +244,7 @@ public class MainActivity extends AppCompatActivity {
                     android.os.Process.killProcess(android.os.Process.myPid());
                 }
             } else{
-                fragmentManager.popBackStack();
-                if(fragmentManager.findFragmentById(R.id.main_fragment).isHidden()){
-                    fragmentManager.beginTransaction().show(fragmentManager.findFragmentById(R.id.main_fragment)).commit();
-                }
-                if(fabStatus.size()>1){
-                    fabStatus.pop();
-                    if(fabStatus.lastElement()){
-                        fab.setVisibility(View.VISIBLE);
-                    }else{
-                        fab.setVisibility(View.GONE);
-                    }
-                }
+                popBack();
             }
         }
         return false;
@@ -243,7 +288,6 @@ public class MainActivity extends AppCompatActivity {
         call.enqueue(new Callback<WeiboPojo.Statuses>() {
             @Override
             public void onResponse(Response<WeiboPojo.Statuses> response) {
-                WeiboPojo.Statuses comments = response.body();
                 Toast.makeText(MainActivity.this,"Repost Success",Toast.LENGTH_SHORT).show();
             }
             @Override
@@ -280,6 +324,48 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("",t.getMessage());
             }
         });
+    }
+
+    public void update(String content,byte[] pic, int visible, int type) {
+        Call<WeiboPojo> call = null;
+        if (apiStores == null) {
+            apiStores = WeiboClient.retrofit().create(WeiboClient.ApiStores.class);
+        }
+        switch (type) {
+            case WEIBO_UPDATE_NO_PIC:
+                call = apiStores.createWeibo(token, content, 0);
+                break;
+            case WEIBO_UPLOAD_WITH_PIC:
+                RequestBody token_body = MultipartBody.create(MediaType.parse("text/plain"),token);
+                RequestBody content_body = MultipartBody.create(MediaType.parse("text/plain"),content);
+                RequestBody visible_body = MultipartBody.create(MediaType.parse("text/plain"),"0");
+                RequestBody pic_body = MultipartBody.create(MediaType.parse("image/png"),pic);
+                call = apiStores.createWeibo(token_body, content_body, visible_body, pic_body);
+                break;
+            default:
+                break;
+        }
+        if (call != null) {
+            call.enqueue(new Callback<WeiboPojo>() {
+                @Override
+                public void onResponse(Response<WeiboPojo> response) {
+                    if (response.errorBody() != null) {
+                        try {
+                            Toast.makeText(MainActivity.this, response.errorBody().string(), Toast.LENGTH_SHORT).show();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }else{
+                        Toast.makeText(MainActivity.this, "发布成功", Toast.LENGTH_SHORT).show();
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable t) {
+                    Toast.makeText(MainActivity.this, t.getMessage(), Toast.LENGTH_SHORT).show();
+                }
+            });
+        }
     }
 
     public void getWeiboData(final int updateType, final String user_id) {
@@ -356,5 +442,20 @@ public class MainActivity extends AppCompatActivity {
                 }
             });
         }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        // 如果获取成功，resultCode为-1
+        if (requestCode == 0 && resultCode == -1) {
+            // 获取原图的Uri，它是一个内容提供者
+            Uri uri = data.getData();
+        }
+        super.onActivityResult(requestCode, resultCode, data);
+    }
+
+    public interface onPost{
+        void post(String content);
+        void post(String content, byte[] pic);
     }
 }

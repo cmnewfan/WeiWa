@@ -1,16 +1,16 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
     tools:context="com.weiwa.ljl.weiwa.ImageFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
+            android:layout_height="30dp"
             android:gravity="center">
             <TextView
                 android:layout_width="match_parent"
@@ -35,11 +35,18 @@
         </RelativeLayout>
         <com.weiwa.ljl.weiwa.ImageViewPager
             android:id="@+id/guide_viewpager"
-            android:layout_below="@id/image_fragment_r_layout"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_below="@id/image_fragment_r_layout"
             android:layout_gravity="center">
         </com.weiwa.ljl.weiwa.ImageViewPager>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/download_text"
+            android:layout_alignParentBottom="true"
+            android:layout_alignParentEnd="true" />
     </RelativeLayout>
 
 </FrameLayout>

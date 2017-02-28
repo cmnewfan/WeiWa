@@ -11,12 +11,15 @@ import android.os.Environment;
 import android.support.annotation.NonNull;
 import android.app.Fragment;
 import android.support.v4.view.ViewPager;
+import android.support.v7.widget.RecyclerView;
+import android.util.DisplayMetrics;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.bumptech.glide.Glide;
 import com.bumptech.glide.load.engine.DiskCacheStrategy;
@@ -50,10 +53,13 @@ public class ImageFragment extends Fragment {
     private File downloadFile;
     private File downloadCategory = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Weiwa");
     private TextView mProgressText;
+    private TextView mDownloadText;
     private ImageButton mShareButton;
     private ImageViewPager mViewPager;
     private Uri[] uris;
     private int currentIndex = 0;
+    private int width;
+    private int height;
 
     public ImageFragment() {
         // Required empty public constructor
@@ -76,6 +82,10 @@ public class ImageFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        DisplayMetrics displayMetrics = new DisplayMetrics();
+        getActivity().getWindowManager().getDefaultDisplay().getMetrics(displayMetrics);
+        width = displayMetrics.widthPixels;
+        height = displayMetrics.heightPixels;
         mView = inflater.inflate(R.layout.fragment_image, container, false);
         mShareButton = (ImageButton) mView.findViewById(R.id.button_share);
         mShareButton.setOnClickListener(new View.OnClickListener() {
@@ -92,7 +102,9 @@ public class ImageFragment extends Fragment {
         });
         mProgressText = (TextView) mView.findViewById(R.id.progress_text);
         mProgressText.setText(currentIndex+1+"/"+uris.length);
+        mDownloadText = (TextView) mView.findViewById(R.id.download_text) ;
         mViewPager = (ImageViewPager) mView.findViewById(R.id.guide_viewpager);
+        mViewPager.setMinimumWidth(RecyclerView.LayoutParams.MATCH_PARENT);
         mViewPager.init(getActivity(), uris, new ImageViewPager.onImageDownladingListener() {
             @Override
             public void onDownload(Uri uri, ImageView imageView) {
@@ -126,7 +138,7 @@ public class ImageFragment extends Fragment {
         mProgressText.setText(content);
     }
 
-    public void LoadGlideImage(Uri targetUri, ImageView imageView) throws MalformedURLException {
+    public void LoadGlideImage(final Uri targetUri, ImageView imageView) throws MalformedURLException {
         if(isGif(targetUri)){
             GlideDrawableImageViewTarget imageViewTarget = new GlideDrawableImageViewTarget(imageView);
             Glide.with(this).load(targetUri).downloadOnly(new SimpleTarget<File>() {
@@ -134,12 +146,12 @@ public class ImageFragment extends Fragment {
                 public void onResourceReady(File resource, GlideAnimation<? super File> glideAnimation) {
                     try {
                         FileInputStream inputStream = new FileInputStream(resource);
-                        downloadFile = new File(downloadCategory,WeatherApplication.getFileName(uris[currentIndex])+".gif");
+                        downloadFile = new File(downloadCategory, WeiwaApplication.getFileName(targetUri)+".gif");
                         FileOutputStream outputStream = new FileOutputStream(downloadFile);
                         int bytesRead = 0;
                         byte[] buffer = new byte[8192];
                         while ((bytesRead = inputStream.read(buffer, 0, 8192)) != -1) {
-                            outputStream.write(buffer, 0, bytesRead);
+                            outputStream.write(buffer,0,bytesRead);
                         }
                         inputStream.close();
                         outputStream.close();
@@ -150,10 +162,10 @@ public class ImageFragment extends Fragment {
                     }
                 }
             });
-            Glide.with(this).load(uris[currentIndex]).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().into(imageViewTarget);
+            Glide.with(this).load(targetUri).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().into(imageViewTarget);
         }else {
             BitmapDownloader bitmapDownloader = new BitmapDownloader();
-            bitmapDownloader.execute(new Object[]{(new URL(targetUri.toString())),imageView});
+            bitmapDownloader.execute(new Object[]{(new URL(targetUri.toString())),imageView,mViewPager.getCurrentItem()});
         }
     }
 
@@ -161,7 +173,8 @@ public class ImageFragment extends Fragment {
         Intent sendIntent = new Intent(Intent.ACTION_SEND);
         //set intent type
         sendIntent.setType("image/*");
-        Uri targetUri = Uri.fromFile(downloadFile);
+        File shareFile = new File(WeiwaApplication.CacheCategory+"/"+WeiwaApplication.getFileName(uris[mViewPager.getCurrentItem()]));
+        Uri targetUri = Uri.fromFile(shareFile);
         if (targetUri != null) {
             sendIntent.putExtra(Intent.EXTRA_STREAM, targetUri);
         }
@@ -179,16 +192,16 @@ public class ImageFragment extends Fragment {
         }
     }
 
-    class BitmapDownloader extends AsyncTask<Object,Bitmap,Bitmap> {
-
+    class BitmapDownloader extends AsyncTask<Object,Object,File> {
         private ImageView imageView;
         @Override
-        protected Bitmap doInBackground(Object... params) {
+        protected File doInBackground(Object... params) {
             Bitmap bitmap;
             try {
                 //获得连接
                 URL url = (URL) params[0];
                 imageView = (ImageView)params[1];
+                int position = (int) params[2];
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 //设置超时时间为6000毫秒，conn.setConnectionTiem(0);表示没有时间限制
                 conn.setConnectTimeout(6000);
@@ -200,40 +213,74 @@ public class ImageFragment extends Fragment {
                 //conn.connect();
                 //得到数据流
                 InputStream is = conn.getInputStream();
-                downloadFile = new File(downloadCategory,WeatherApplication.getFileName(uris[currentIndex]));
+                downloadFile = new File(downloadCategory, WeiwaApplication.getFileName(url));
                 OutputStream os = new FileOutputStream(downloadFile);
                 int bytesRead = 0;
-                byte[] buffer = new byte[8192];
-                while ((bytesRead = is.read(buffer, 0, 8192)) != -1) {
-                    os.write(buffer, 0, bytesRead);
+                int count = conn.getContentLength();
+                byte[] buffer = new byte[count];
+                float progress = 0.0f;
+                int offset = 0;
+                int read = 8192;
+                if(read>count){
+                    read = count;
+                }
+                while ((bytesRead = is.read(buffer, offset, read)) != -1) {
+                    os.write(buffer,offset,bytesRead);
+                    offset += bytesRead;
+                    if(is.available()!=0) {
+                        progress = (float)offset / count;
+                    }else{
+                        progress = (float)offset / count;
+                    }
+                    if(count-offset<=read){
+                        read = count-offset;
+                    }
+                    if(WeiwaApplication.getFileName(url).equals(WeiwaApplication.getFileName(uris[position]))){
+                        publishProgress(progress);
+                    }
                 }
                 os.close();
-                //解析得到图片
-                bitmap = BitmapFactory.decodeFile(downloadFile.getAbsolutePath());
-                //关闭数据流
                 is.close();
-                return bitmap;
+                return downloadFile;
             } catch (Exception ex) {
                 ex.printStackTrace();
             }
             return null;
         }
+
         @Override
-        protected void onPostExecute(Bitmap result) {
-            if(result.getHeight()> GL11.GL_MAX_TEXTURE_SIZE){
-                int newHeight = (int) ( result.getHeight() * (512.0 / result.getWidth()) );
-                Bitmap putImage = Bitmap.createScaledBitmap(result, 512, newHeight, true);
-                //mViewPager.setImageView(position,putImage);
-                imageView.setImageBitmap(putImage);
-                imageView.invalidate();
-            }else {
-                //mViewPager.setImageView(position,result);
-                imageView.setImageBitmap(result);
-                imageView.invalidate();
+        protected void onProgressUpdate(Object... values) {
+            int display_progress = (int)((float)values[0]*100);
+            mDownloadText.setVisibility(View.VISIBLE);
+            mDownloadText.setText(display_progress+"%");
+            if(display_progress==1){
+                mDownloadText.setText("0");
+                mDownloadText.setVisibility(View.INVISIBLE);
             }
-            PhotoViewAttacher attacher = new PhotoViewAttacher(imageView);
-            attacher.setAllowParentInterceptOnEdge(true);
-            //mViewPager.getImageView(position).invalidate();
+        }
+
+        @Override
+        protected void onPostExecute(File result) {
+            //GL11.GL_MAX_TEXTURE_SIZE
+            imageView.setImageURI(Uri.fromFile(result));
+            if((float)(imageView.getDrawable().getIntrinsicHeight()/imageView.getDrawable().getIntrinsicWidth())>2.0f){
+                //int newHeight = (int) ( result.getHeight() * (512.0 / result.getWidth()) );
+                //Bitmap putImage = Bitmap.createScaledBitmap(result, 512, newHeight, true);
+                //int height = putImage.getHeight();
+                //imageView.setImageBitmap(result);
+                //imageView.invalidate();
+                //int w1 = result.getWidth();
+                PhotoViewAttacher attacher = new PhotoViewAttacher(imageView);
+                float ratio = (float)imageView.getWidth()/(float)(attacher.getImageView().getDrawable().getIntrinsicWidth());
+                if(ratio<4 && ratio>2){
+                    ratio = ratio/2;
+                }
+                attacher.setScaleLevels(ratio/2,ratio,ratio*2);
+                attacher.setScale(ratio,ratio,ratio,true);
+            }else {
+                PhotoViewAttacher attacher = new PhotoViewAttacher(imageView);
+                //imageView.invalidate();
+            }
         }
     }
 }

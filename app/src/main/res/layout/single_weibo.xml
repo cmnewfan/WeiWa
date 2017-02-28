@@ -74,12 +74,13 @@
         android:id="@+id/weibo_text"
         android:autoLink="web"/>
     <LinearLayout
-    android:layout_width="match_parent"
-    android:layout_height="100dp"
-    android:orientation="horizontal"
-    android:id="@+id/weibo_image_line_1"
-    android:gravity="center">
-    </LinearLayout>
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:orientation="horizontal"
+        android:id="@+id/weibo_image_line_1"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:gravity="left"/>
     <View
         android:layout_width="match_parent"
         android:layout_height="4dp"
@@ -90,7 +91,9 @@
         android:layout_height="100dp"
         android:orientation="horizontal"
         android:id="@+id/weibo_image_line_2"
-        android:gravity="center">
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:gravity="left">
     </LinearLayout>
     <View
         android:layout_width="match_parent"
@@ -102,7 +105,9 @@
         android:layout_height="100dp"
         android:orientation="horizontal"
         android:id="@+id/weibo_image_line_3"
-        android:gravity="center">
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
+        android:gravity="left">
     </LinearLayout>
     <RelativeLayout
         android:layout_width="match_parent"

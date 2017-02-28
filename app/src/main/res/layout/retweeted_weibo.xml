@@ -116,8 +116,10 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:orientation="horizontal"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
         android:id="@+id/retweeted_weibo_image_line_1"
-        android:gravity="center">
+        android:gravity="left">
     </LinearLayout>
     <View
         android:layout_width="match_parent"
@@ -128,8 +130,10 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:orientation="horizontal"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
         android:id="@+id/retweeted_weibo_image_line_2"
-        android:gravity="center">
+        android:gravity="left">
     </LinearLayout>
     <View
         android:layout_width="match_parent"
@@ -140,8 +144,10 @@
         android:layout_width="match_parent"
         android:layout_height="100dp"
         android:orientation="horizontal"
+        android:layout_marginLeft="4dp"
+        android:layout_marginRight="4dp"
         android:id="@+id/retweeted_weibo_image_line_3"
-        android:gravity="center">
+        android:gravity="left">
     </LinearLayout>
     <RelativeLayout
         android:layout_width="match_parent"

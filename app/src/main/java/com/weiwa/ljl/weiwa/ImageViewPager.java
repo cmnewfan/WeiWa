@@ -22,8 +22,6 @@ import uk.co.senab.photoview.PhotoViewAttacher;
  */
 public class ImageViewPager extends ViewPager {
 
-    private ImageView[] ImageViews;
-    private PhotoViewAttacher[] attachers;
     private Uri[] mUris;
     private Context mContext;
     private onImageDownladingListener mListener;
@@ -37,34 +35,32 @@ public class ImageViewPager extends ViewPager {
         super(context, attrs);
     }
 
-
     public void init(Context context,Uri[] uris,onImageDownladingListener listener,int index){
         mContext = context;
         mUris = uris;
         mListener = listener;
-        ImageViews = new ImageView[uris.length];
-        attachers = new PhotoViewAttacher[uris.length];
-        for(int i=0;i<uris.length;i++){
-            ImageViews[i] = new ImageView(mContext);
-            ImageViews[i].setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT));
-            ImageViews[i].setAdjustViewBounds(true);
-            ImageViews[i].setScaleType(ImageView.ScaleType.FIT_CENTER);
-            attachers[i] = new PhotoViewAttacher(ImageViews[i]);
-            attachers[i].setAllowParentInterceptOnEdge(true);
-        }
         InitViewAdapter();
         mIndex = index;
         setCurrentItem(mIndex);
     }
 
-    public void setImageView(int position,Bitmap bitmap){
-        ImageViews[position].setImageBitmap(bitmap);
-        attachers[position].update();
-        ImageViews[position].invalidate();
-    }
-
-    public ImageView getImageView(int position){
-        return ImageViews[position];
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        int height = 0;
+        for(int i = 0; i < getChildCount(); i++) {
+            View child = getChildAt(i);
+            //child.measure(widthMeasureSpec, MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED));
+            int h = child.getMeasuredHeight();
+            if(h > height) {
+                height = h;
+            }
+        }
+        if(height == 0){
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }else {
+            heightMeasureSpec = MeasureSpec.makeMeasureSpec(height, MeasureSpec.EXACTLY);
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
     }
 
     private void InitViewAdapter() {
@@ -95,13 +91,11 @@ public class ImageViewPager extends ViewPager {
 
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
-                View view = new View(mContext);
-                view.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT));
                 ImageView imageView = new ImageView(mContext);
-                imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT));
-                /*View view = LayoutInflater.from(container.getContext()).inflate(R.layout.image_view, container, false);
-                ImageView imageView = (ImageView) view.findViewById(R.id.guide_image_1);*/
+                imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT));
+                imageView.setAdjustViewBounds(true);
                 container.addView(imageView);
+                //container.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 mListener.onDownload(mUris[position],imageView);
                 return imageView;
             }
