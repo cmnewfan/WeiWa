@@ -165,6 +165,7 @@ public class ImageFragment extends Fragment {
             Glide.with(this).load(targetUri).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().into(imageViewTarget);
         }else {
             BitmapDownloader bitmapDownloader = new BitmapDownloader();
+            //current item position is used to display progress of item downloading
             bitmapDownloader.execute(new Object[]{(new URL(targetUri.toString())),imageView,mViewPager.getCurrentItem()});
         }
     }
@@ -262,6 +263,10 @@ public class ImageFragment extends Fragment {
         @Override
         protected void onPostExecute(File result) {
             //GL11.GL_MAX_TEXTURE_SIZE
+            if(result==null){
+                Toast.makeText(ImageFragment.this.getActivity(),"文件下载失败",Toast.LENGTH_SHORT).show();
+                return;
+            }
             imageView.setImageURI(Uri.fromFile(result));
             if((float)(imageView.getDrawable().getIntrinsicHeight()/imageView.getDrawable().getIntrinsicWidth())>2.0f){
                 //int newHeight = (int) ( result.getHeight() * (512.0 / result.getWidth()) );
@@ -279,7 +284,6 @@ public class ImageFragment extends Fragment {
                 attacher.setScale(ratio,ratio,ratio,true);
             }else {
                 PhotoViewAttacher attacher = new PhotoViewAttacher(imageView);
-                //imageView.invalidate();
             }
         }
     }

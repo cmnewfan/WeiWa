@@ -206,6 +206,9 @@ class Retweeted_ViewHolder extends CustomViewHolder{
         downloaderRetweet.execute(new Object[]{statuses.getUser().getProfile_image_url(),retweet_user_portrait,1,1});
         ImageDownloader downloaderRetweeted = new ImageDownloader(getContext());
         downloaderRetweeted.execute(new Object[]{statuses.getRetweeted_status().getUser().getProfile_image_url(),retweeted_user_portrait,1,1});
+        if(statuses.getRetweeted_status().getPic_urls()!=null && statuses.getRetweeted_status().getPic_urls().length==1){
+            retweeted_line_1.setGravity(Gravity.CENTER);
+        }
         refreshImage(statuses,statuses.getRetweeted_status().getPic_urls(),statuses.getRetweeted_status().convertToUris(),this.retweeted_line_1,this.retweeted_line_2,this.retweeted_line_3);
     }
 
@@ -298,6 +301,9 @@ class Retweeted_ViewHolder extends CustomViewHolder{
         this.date.setText(statuses.getCreated_at());
         this.repost.setText(statuses.getReposts_count());
         this.comment.setText(statuses.getComments_count());
+         if(statuses.getPic_urls()!=null && statuses.getPic_urls().length==1){
+             line_1.setGravity(Gravity.CENTER);
+         }
         refreshImage(statuses,statuses.getPic_urls(),statuses.convertToUris(),line_1,line_2,line_3);
     }
      public void setCommentUnderline(){
@@ -362,7 +368,7 @@ class CustomViewHolder extends RecyclerView.ViewHolder {
             int count = 0;
             for (final WeiboPojo.Pic_urls url :
                     urls) {
-                final CustomImageView imageView = new CustomImageView(mContext.getActivity());
+                final ImageView imageView = new ImageView(mContext.getActivity());
                 final int index = count;
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -501,8 +507,6 @@ class ImageDownloader extends AsyncTask<Object,Bitmap,Bitmap>{
     @Override
     protected Bitmap doInBackground(Object... params) {
         try{
-            //URL myFileURL = new URL(params[0].toString().replace("thumbnail","large"));
-            //URL myFileURL = new URL(params[0].toString());
             URL myFileURL = new URL(params[0].toString());
             if(!params[0].toString().toLowerCase().endsWith(".gif")) {
                 myFileURL = new URL(params[0].toString().replace("thumbnail", "bmiddle"));

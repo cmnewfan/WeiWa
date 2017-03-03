@@ -101,6 +101,7 @@ public class WeiboRetweetCommentFragment extends Fragment {
         mRecyclerView.setHasFixedSize(true);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mRecyclerView.setItemAnimator(new DefaultItemAnimator());
+        mRecyclerView.setNestedScrollingEnabled(false);
         mRecyclerView.addItemDecoration(new VerticalSpaceItemDecoration(ItemDivider));
         adapter = new CommentAdapter(commentPojo,WeiboRetweetCommentFragment.this);
         mRecyclerView.setAdapter(adapter);

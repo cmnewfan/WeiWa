@@ -7,6 +7,7 @@ import android.app.FragmentTransaction;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.v7.app.AppCompatActivity;
@@ -52,7 +53,6 @@ public class MainActivity extends AppCompatActivity {
     private ImageButton add;
     private ImageButton upload;
     private boolean isUserLastOne=false;
-    private String weibo_since_id;
     private WeiboPojo currentWeibo;
     private onWeiboUpdatedListener onWeiboPOJOUpdated;
     private OnUserUpdatedListener onUserUpdatedListener;
@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity {
     public static final String SCOPE = // 应用申请的高级权限
             "email,direct_messages_read,direct_messages_write,"
                     + "friendships_groups_read,friendships_groups_write,statuses_to_me_read,"
-                    + "follow_app_official_microblog," + "invitation_write";
+                    + "follow_app_official_microblog," + "invitation_write,timeline_batch";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -86,6 +86,7 @@ public class MainActivity extends AppCompatActivity {
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                //get the newest data
                 weibo_max_id = null;
                 getWeiboData(WEIBO_GET_NEW,null);
             }
@@ -215,13 +216,8 @@ public class MainActivity extends AppCompatActivity {
                 initAuth();
                 return true;
             case R.id.clear_cache:
-                if(WeiwaApplication.CacheCategory.exists()){
-                    File[] files = WeiwaApplication.CacheCategory.listFiles();
-                    for(File file : files){
-                        file.delete();
-                    }
-                    Toast.makeText(this,"缓存已清除完毕",Toast.LENGTH_SHORT).show();
-                }
+                Toast.makeText(this,"开始清除缓存",Toast.LENGTH_SHORT).show();
+                new ClearTask().execute(0);
         }
 
         return super.onOptionsItemSelected(item);
@@ -258,6 +254,11 @@ public class MainActivity extends AppCompatActivity {
         getWeiboComment(WEIBO_GET_COMMENT, id);
     }
 
+    /**
+     * create comment of specified weibo(id)
+     * @param id id of commented weibo
+     * @param content content of comment
+     */
     public void createComment(String id, String content){
         Call<WeiboCommentPojo> call = null;
         if(apiStores == null){
@@ -279,6 +280,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * create repost of specified weibo
+     * @param id id of reposted weibo
+     * @param content content of repost
+     */
     public void createRepost(String id, String content){
         Call<WeiboPojo.Statuses> call = null;
         if(apiStores == null){
@@ -298,6 +304,11 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * get comments of specified weibo
+     * @param updateType not used
+     * @param id id of specified weibo
+     */
     private void getWeiboComment(final int updateType, String id) {
         Call<WeiboCommentPojo> call = null;
         if(apiStores == null){
@@ -326,6 +337,13 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    /**
+     * create new weibo
+     * @param content content of new weibo
+     * @param pic byte array of pic if has one
+     * @param visible not used
+     * @param type with pic or without pic
+     */
     public void update(String content,byte[] pic, int visible, int type) {
         Call<WeiboPojo> call = null;
         if (apiStores == null) {
@@ -368,6 +386,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    /**
+     * get weibo of your following
+     * @param updateType get the first 20 weibos or the following
+     * @param user_id id of app user
+     */
     public void getWeiboData(final int updateType, final String user_id) {
         Call<WeiboPojo> call = null;
         if(apiStores == null){
@@ -444,6 +467,13 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+
+    /**
+     * to get the uti of selected pic
+     * @param requestCode
+     * @param resultCode
+     * @param data
+     */
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         // 如果获取成功，resultCode为-1
@@ -457,5 +487,24 @@ public class MainActivity extends AppCompatActivity {
     public interface onPost{
         void post(String content);
         void post(String content, byte[] pic);
+    }
+
+    class ClearTask extends AsyncTask<Object,Object,Object>{
+
+        @Override
+        protected Object doInBackground(Object... params) {
+            if(WeiwaApplication.CacheCategory.exists()){
+                File[] files = WeiwaApplication.CacheCategory.listFiles();
+                for(File file : files){
+                    file.delete();
+                }
+            }
+            return null;
+        }
+
+        @Override
+        protected void onPostExecute(Object result) {
+            Toast.makeText(MainActivity.this,"已经清除完毕",Toast.LENGTH_SHORT).show();
+        }
     }
 }

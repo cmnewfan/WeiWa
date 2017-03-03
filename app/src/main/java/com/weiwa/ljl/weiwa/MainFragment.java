@@ -81,6 +81,7 @@ public class MainFragment extends Fragment {
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
+        //init AdapterEvent for adater calling comment or repost
         onNeedInsert = new onAdapterEvent() {
             @Override
             public void onNeedInsert() {
@@ -99,6 +100,7 @@ public class MainFragment extends Fragment {
                 ((MainActivity)getActivity()).createRepost(id,content);
             }
         };
+        //implements event of activity for refresh following data and display weibo
         ((MainActivity)getActivity()).setOnWeiboPOJOUpdated(new onWeiboUpdatedListener() {
             @Override
             public void onUpdate(WeiboPojo pojo, int updateType) {

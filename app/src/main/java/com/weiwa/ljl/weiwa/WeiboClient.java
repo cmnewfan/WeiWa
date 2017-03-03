@@ -51,9 +51,9 @@ public class WeiboClient {
         @FormUrlEncoded
         @POST("statuses/repost.json")
         Call<WeiboPojo.Statuses> createRepost(@Field("access_token") String token, @Field("id") String id, @Field("status") String content);
-        @GET("statuses/user_timeline.json")
+        @GET("statuses/timeline_batch.json")
         Call<WeiboPojo> getUserWeiboData(@Query("access_token") String token, @Query("screen_name") String uid);
-        @GET("statuses/user_timeline.json")
+        @GET("statuses/timeline_batch.json")
         Call<WeiboPojo> getUserWeiboData(@Query("access_token") String token,@Query("uid") String uid, @Query("max_id") String max_id);
         @FormUrlEncoded
         @POST("statuses/update.json")
