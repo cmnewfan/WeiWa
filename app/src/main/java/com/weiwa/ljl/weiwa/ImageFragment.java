@@ -1,6 +1,7 @@
 package com.weiwa.ljl.weiwa;
 
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -9,7 +10,6 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.annotation.NonNull;
-import android.app.Fragment;
 import android.support.v4.view.ViewPager;
 import android.support.v7.widget.RecyclerView;
 import android.util.DisplayMetrics;
@@ -26,6 +26,8 @@ import com.bumptech.glide.load.engine.DiskCacheStrategy;
 import com.bumptech.glide.request.animation.GlideAnimation;
 import com.bumptech.glide.request.target.GlideDrawableImageViewTarget;
 import com.bumptech.glide.request.target.SimpleTarget;
+import com.diegocarloslima.byakugallery.lib.TileBitmapDrawable;
+import com.diegocarloslima.byakugallery.lib.TouchImageView;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -60,6 +62,7 @@ public class ImageFragment extends Fragment {
     private int currentIndex = 0;
     private int width;
     private int height;
+    private int MAX_SIZE = 8192;
 
     public ImageFragment() {
         // Required empty public constructor
@@ -162,7 +165,7 @@ public class ImageFragment extends Fragment {
                     }
                 }
             });
-            Glide.with(this).load(targetUri).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().into(imageViewTarget);
+            Glide.with(this).load(targetUri).diskCacheStrategy(DiskCacheStrategy.SOURCE).crossFade().fitCenter().into(imageViewTarget);
         }else {
             BitmapDownloader bitmapDownloader = new BitmapDownloader();
             //current item position is used to display progress of item downloading
@@ -194,14 +197,14 @@ public class ImageFragment extends Fragment {
     }
 
     class BitmapDownloader extends AsyncTask<Object,Object,File> {
-        private ImageView imageView;
+        private TouchImageView imageView;
         @Override
         protected File doInBackground(Object... params) {
             Bitmap bitmap;
             try {
                 //获得连接
                 URL url = (URL) params[0];
-                imageView = (ImageView)params[1];
+                imageView = (TouchImageView) params[1];
                 int position = (int) params[2];
                 HttpURLConnection conn = (HttpURLConnection) url.openConnection();
                 //设置超时时间为6000毫秒，conn.setConnectionTiem(0);表示没有时间限制
@@ -267,21 +270,55 @@ public class ImageFragment extends Fragment {
                 Toast.makeText(ImageFragment.this.getActivity(),"文件下载失败",Toast.LENGTH_SHORT).show();
                 return;
             }
+            if (imageView == null) {
+                return;
+            }
             imageView.setImageURI(Uri.fromFile(result));
             if((float)(imageView.getDrawable().getIntrinsicHeight()/imageView.getDrawable().getIntrinsicWidth())>2.0f){
-                //int newHeight = (int) ( result.getHeight() * (512.0 / result.getWidth()) );
-                //Bitmap putImage = Bitmap.createScaledBitmap(result, 512, newHeight, true);
-                //int height = putImage.getHeight();
-                //imageView.setImageBitmap(result);
+                if (imageView.getDrawable().getIntrinsicHeight() > GL11.GL_MAX_TEXTURE_SIZE) {
+
+                    /*Bitmap newBitmap = BitmapFactory.decodeFile(result.getAbsolutePath());
+                    int newWidth = imageView.getWidth();
+                    float ratio = (((float)imageView.getDrawable().getIntrinsicHeight())/((float)imageView.getDrawable().getIntrinsicWidth()));
+                    int newHeight = (int)(ratio)*newWidth;
+                    Bitmap putImage = Bitmap.createScaledBitmap(newBitmap, newWidth, newHeight, true);
+                    try {
+                        BitmapFactory.Options option = new BitmapFactory.Options();
+                        option.outHeight = 8190;
+                        option.outWidth = newWidth;
+                        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+                        putImage.compress(Bitmap.CompressFormat.PNG, 100, baos);
+                        BitmapRegionDecoder decoder = BitmapRegionDecoder.newInstance(baos.toByteArray(),0,baos.toByteArray().length,false);
+                        if(newHeight>GL11.GL_MAX_TEXTURE_SIZE) {
+                            imageView.setImageBitmap(decoder.decodeRegion(new Rect(0, 0, width, GL11.GL_MAX_TEXTURE_SIZE - 10), option));
+                        }else{
+                            imageView.setImageBitmap(decoder.decodeRegion(new Rect(0, 0, width, newHeight), option));
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    PhotoViewAttacher attacher = new PhotoViewAttacher(imageView);*/
+                }
+                Bitmap newBitmap = BitmapFactory.decodeFile(result.getAbsolutePath());
+                int newWidth = imageView.getWidth();
+                float ratio = (((float) newWidth) / ((float) newBitmap.getWidth()));
+                imageView.setMaxScale(ratio);
+                TileBitmapDrawable.attachTileBitmapDrawable(imageView, result.getAbsolutePath(), null, null);
+                try {
+                    Runtime.getRuntime().exec("adb shell input tap 100 100");
+                    Runtime.getRuntime().exec("adb shell input tap 100 100");
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
                 //imageView.invalidate();
                 //int w1 = result.getWidth();
-                PhotoViewAttacher attacher = new PhotoViewAttacher(imageView);
-                float ratio = (float)imageView.getWidth()/(float)(attacher.getImageView().getDrawable().getIntrinsicWidth());
-                if(ratio<4 && ratio>2){
+                //float ratio = (float)imageView.getWidth()/(float)(attacher.getImageView().getDrawable().getIntrinsicWidth());
+                /*if(ratio<4 && ratio>2){
                     ratio = ratio/2;
                 }
                 attacher.setScaleLevels(ratio/2,ratio,ratio*2);
-                attacher.setScale(ratio,ratio,ratio,true);
+                attacher.setScale(ratio,ratio,ratio,true);*/
+                //attacher.update();
             }else {
                 PhotoViewAttacher attacher = new PhotoViewAttacher(imageView);
             }

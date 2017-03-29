@@ -1,22 +1,21 @@
 package com.weiwa.ljl.weiwa;
 
+import android.app.Fragment;
 import android.content.Context;
 import android.graphics.Rect;
 import android.net.Uri;
 import android.os.Bundle;
-import android.app.Fragment;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
 import android.widget.Toast;
 
 import com.weiwa.ljl.weiwa.WeiboModel.WeiboCommentPojo;
 import com.weiwa.ljl.weiwa.WeiboModel.WeiboPojo;
-
-import java.net.URLEncoder;
 
 
 /**
@@ -77,6 +76,15 @@ public class MainFragment extends Fragment {
         }
     }
 
+    public void fadeRecyclerView(int index) {
+        LinearLayoutManager manager = (LinearLayoutManager) mRecyclerView.getLayoutManager();
+        for (int i = manager.findFirstVisibleItemPosition(); i <= manager.findLastVisibleItemPosition(); i++) {
+            if (i != index && mRecyclerView.getChildAt(i) != null) {
+                mRecyclerView.getChildAt(i).startAnimation(AnimationUtils.loadAnimation(getActivity(), R.anim.trans_anim));
+            }
+        }
+    }
+
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
@@ -114,6 +122,7 @@ public class MainFragment extends Fragment {
                         mWeiboAdapter.insertNewData(pojo);
                     }
                 }
+                ((MainActivity) getActivity()).stopAnimation();
             }
             @Override
             public void onComment(WeiboCommentPojo comment){

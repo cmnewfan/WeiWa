@@ -14,11 +14,11 @@ import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.KeyEvent;
-import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.ViewGroup;
-import android.widget.Gallery;
+import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -39,7 +39,6 @@ import okhttp3.RequestBody;
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
-import retrofit2.http.Multipart;
 
 public class MainActivity extends AppCompatActivity {
     private AuthInfo mAuthInfo;
@@ -83,10 +82,12 @@ public class MainActivity extends AppCompatActivity {
         toolbar.setTitle(R.string.app_name);
         setSupportActionBar(toolbar);
         fab = (FloatingActionButton) findViewById(R.id.fab);
+        final Animation animation = AnimationUtils.loadAnimation(this, R.anim.rotate_anim);
         fab.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 //get the newest data
+                fab.startAnimation(animation);
                 weibo_max_id = null;
                 getWeiboData(WEIBO_GET_NEW,null);
             }
@@ -121,6 +122,7 @@ public class MainActivity extends AppCompatActivity {
                 .setDecodeFormat(DecodeFormat.PREFER_ARGB_8888);
         mMainFragment = new MainFragment();
         setDefaultFragment();
+        fab.startAnimation(animation);
         getWeiboData(WEIBO_GET_NEW,null);
     }
 
@@ -302,6 +304,10 @@ public class MainActivity extends AppCompatActivity {
                 Log.e("",t.getMessage());
             }
         });
+    }
+
+    public void stopAnimation() {
+        fab.clearAnimation();
     }
 
     /**

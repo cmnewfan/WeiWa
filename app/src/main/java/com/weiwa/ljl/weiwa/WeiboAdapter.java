@@ -17,11 +17,13 @@ import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.GridLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.PopupWindow;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -35,6 +37,8 @@ import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import javax.microedition.khronos.opengles.GL11;
+
 /**
  * Created by hzfd on 2017/1/17.
  */
@@ -45,6 +49,7 @@ public class WeiboAdapter extends RecyclerView.Adapter {
     private final int SINGLE_WB = 0;
     private final int RETWEETED_WB = 1;
     private onAdapterEvent onNeedInsert;
+    private Animation animation;
 
     @Override
     public RecyclerView.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
@@ -69,10 +74,30 @@ public class WeiboAdapter extends RecyclerView.Adapter {
     }
 
     @Override
-    public void onBindViewHolder(RecyclerView.ViewHolder holder, final int position) {
+    public void onBindViewHolder(final RecyclerView.ViewHolder holder, final int position) {
         holder.itemView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+
+                animation.setAnimationListener(new Animation.AnimationListener() {
+                    @Override
+                    public void onAnimationStart(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationEnd(Animation animation) {
+
+                    }
+
+                    @Override
+                    public void onAnimationRepeat(Animation animation) {
+
+                    }
+                });
+                if (mContext instanceof MainFragment) {
+                    ((MainFragment) mContext).fadeRecyclerView(position);
+                }
                 onNeedInsert.onNeedComment(weibo_data.getStatuses()[position].getId());
             }
         });
@@ -107,6 +132,7 @@ public class WeiboAdapter extends RecyclerView.Adapter {
         this.weibo_data = weibo_pojo;
         this.mContext = context;
         this.onNeedInsert = onNeed;
+        this.animation = AnimationUtils.loadAnimation(mContext.getActivity(), R.anim.fade_in);
     }
 
     public void insertNewData(WeiboPojo newData){
@@ -137,9 +163,9 @@ class Retweeted_ViewHolder extends CustomViewHolder{
     TextView retweeted_date;
     TextView retweeted_repost;
     TextView retweeted_comment;
-    LinearLayout retweeted_line_1;
-    LinearLayout retweeted_line_2;
-    LinearLayout retweeted_line_3;
+    GridLayout retweeted_line_1;
+    GridLayout retweeted_line_2;
+    GridLayout retweeted_line_3;
     String retweet_id;
     ImageButton option;
     public Retweeted_ViewHolder(View itemView,Fragment context, onAdapterEvent event) {
@@ -167,9 +193,9 @@ class Retweeted_ViewHolder extends CustomViewHolder{
         retweeted_date = (TextView) itemView.findViewById(R.id.retweeted_weibo_date);
         retweeted_repost = (TextView) itemView.findViewById(R.id.retweeted_repost_text);
         retweeted_comment = (TextView) itemView.findViewById(R.id.retweeted_comment_text);
-        retweeted_line_1 = (LinearLayout) itemView.findViewById(R.id.retweeted_weibo_image_line_1);
-        retweeted_line_2 = (LinearLayout) itemView.findViewById(R.id.retweeted_weibo_image_line_2);
-        retweeted_line_3 = (LinearLayout) itemView.findViewById(R.id.retweeted_weibo_image_line_3);
+        retweeted_line_1 = (GridLayout) itemView.findViewById(R.id.retweeted_weibo_image_line_1);
+        retweeted_line_2 = (GridLayout) itemView.findViewById(R.id.retweeted_weibo_image_line_2);
+        retweeted_line_3 = (GridLayout) itemView.findViewById(R.id.retweeted_weibo_image_line_3);
         option = (ImageButton) itemView.findViewById(R.id.option);
     }
 
@@ -202,12 +228,14 @@ class Retweeted_ViewHolder extends CustomViewHolder{
             }
         });
         this.retweeted_user.setText(statuses.getRetweeted_status().getUser().getName());
-        ImageDownloader downloaderRetweet = new ImageDownloader(getContext());
-        downloaderRetweet.execute(new Object[]{statuses.getUser().getProfile_image_url(),retweet_user_portrait,1,1});
-        ImageDownloader downloaderRetweeted = new ImageDownloader(getContext());
-        downloaderRetweeted.execute(new Object[]{statuses.getRetweeted_status().getUser().getProfile_image_url(),retweeted_user_portrait,1,1});
+        this.retweet_user_portrait.addDownloadTask(statuses.getUser().getProfile_image_url(), 1, 1);
+        this.retweeted_user_portrait.addDownloadTask(statuses.getRetweeted_status().getUser().getProfile_image_url(), 1, 1);
+        //ImageDownloader downloaderRetweet = new ImageDownloader(getContext());
+        //downloaderRetweet.execute(new Object[]{statuses.getUser().getProfile_image_url(),retweet_user_portrait,1,1});
+        //ImageDownloader downloaderRetweeted = new ImageDownloader(getContext());
+        //downloaderRetweeted.execute(new Object[]{statuses.getRetweeted_status().getUser().getProfile_image_url(),retweeted_user_portrait,1,1});
         if(statuses.getRetweeted_status().getPic_urls()!=null && statuses.getRetweeted_status().getPic_urls().length==1){
-            retweeted_line_1.setGravity(Gravity.CENTER);
+            //retweeted_line_1.setGravity(Gravity.CENTER);
         }
         refreshImage(statuses,statuses.getRetweeted_status().getPic_urls(),statuses.getRetweeted_status().convertToUris(),this.retweeted_line_1,this.retweeted_line_2,this.retweeted_line_3);
     }
@@ -223,18 +251,19 @@ class Retweeted_ViewHolder extends CustomViewHolder{
 }
 
  class SingleWB_ViewHolder extends CustomViewHolder {
-    TextView user_name;
-    PortraitView user_portrait;
-    TextView text;
-    TextView date;
-    TextView repost;
-    TextView comment;
-    LinearLayout line_1;
-    LinearLayout line_2;
-    LinearLayout line_3;
+     TextView user_name;
+     PortraitView user_portrait;
+     TextView text;
+     TextView date;
+     TextView repost;
+     TextView comment;
+     GridLayout line_1;
+     GridLayout line_2;
+     GridLayout line_3;
      WeiboPojo.User user;
      ImageButton option;
-    public SingleWB_ViewHolder(View itemView,Fragment context, onAdapterEvent event) {
+
+     public SingleWB_ViewHolder(View itemView, Fragment context, onAdapterEvent event) {
         super(itemView,context,event);
         initView(itemView);
     }
@@ -288,23 +317,24 @@ class Retweeted_ViewHolder extends CustomViewHolder{
                  setCommentUnderline();
              }
          });
-         line_1 = (LinearLayout) itemView.findViewById(R.id.weibo_image_line_1);
-         line_2 = (LinearLayout) itemView.findViewById(R.id.weibo_image_line_2);
-         line_3 = (LinearLayout) itemView.findViewById(R.id.weibo_image_line_3);
+         line_1 = (GridLayout) itemView.findViewById(R.id.weibo_image_line_1);
+         line_2 = (GridLayout) itemView.findViewById(R.id.weibo_image_line_2);
+         line_3 = (GridLayout) itemView.findViewById(R.id.weibo_image_line_3);
      }
 
      public void refresh(final WeiboPojo.Statuses statuses){
-        this.user_name.setText(statuses.getUser().getName());
-        ImageDownloader downloader = new ImageDownloader(getContext());
-        downloader.execute(new Object[]{statuses.getUser().getProfile_image_url(),user_portrait,1,1});
-        this.text.setText(statuses.getText());
-        this.date.setText(statuses.getCreated_at());
-        this.repost.setText(statuses.getReposts_count());
-        this.comment.setText(statuses.getComments_count());
-         if(statuses.getPic_urls()!=null && statuses.getPic_urls().length==1){
-             line_1.setGravity(Gravity.CENTER);
+         this.user_name.setText(statuses.getUser().getName());
+         this.user_portrait.addDownloadTask(statuses.getUser().getProfile_image_url(), 1, 1);
+         //ImageDownloader downloader = new ImageDownloader(getContext());
+         //downloader.execute(new Object[]{statuses.getUser().getProfile_image_url(),user_portrait,1,1});
+         this.text.setText(statuses.getText());
+         this.date.setText(statuses.getCreated_at());
+         this.repost.setText(statuses.getReposts_count());
+         this.comment.setText(statuses.getComments_count());
+         if (statuses.getPic_urls() != null && statuses.getPic_urls().length == 1) {
+             //line_1.setGravity(Gravity.CENTER);
          }
-        refreshImage(statuses,statuses.getPic_urls(),statuses.convertToUris(),line_1,line_2,line_3);
+         refreshImage(statuses, statuses.getPic_urls(), statuses.convertToUris(), line_1, line_2, line_3);
     }
      public void setCommentUnderline(){
          comment.setPaintFlags(comment.getPaintFlags() |   Paint.UNDERLINE_TEXT_FLAG);
@@ -318,8 +348,6 @@ class Retweeted_ViewHolder extends CustomViewHolder{
      public void setUser(WeiboPojo.User wUser){
          user_portrait.setData((MainActivity) getContext().getActivity(),wUser);
      }
-
-
 }
 
 class CustomViewHolder extends RecyclerView.ViewHolder {
@@ -357,7 +385,7 @@ class CustomViewHolder extends RecyclerView.ViewHolder {
         id = w_id;
     }
 
-    void refreshImage(final WeiboPojo.Statuses statuses, final WeiboPojo.Pic_urls[] urls, final Uri[] convert_uris, LinearLayout line_1, LinearLayout line_2, LinearLayout line_3){
+    void refreshImage(final WeiboPojo.Statuses statuses, final WeiboPojo.Pic_urls[] urls, final Uri[] convert_uris, GridLayout line_1, GridLayout line_2, GridLayout line_3) {
         line_1.setVisibility(View.GONE);
         line_2.setVisibility(View.GONE);
         line_3.setVisibility(View.GONE);
@@ -368,7 +396,7 @@ class CustomViewHolder extends RecyclerView.ViewHolder {
             int count = 0;
             for (final WeiboPojo.Pic_urls url :
                     urls) {
-                final ImageView imageView = new ImageView(mContext.getActivity());
+                final PortraitView imageView = new PortraitView(mContext.getActivity(), url.getThumbnail_pic(), urls.length, 0);
                 final int index = count;
                 imageView.setOnClickListener(new View.OnClickListener() {
                     @Override
@@ -399,13 +427,6 @@ class CustomViewHolder extends RecyclerView.ViewHolder {
                     line_3.addView(view);
                     line_3.setVisibility(View.VISIBLE);
                 }
-                Thread downloadThread = new Thread(){
-                  public void run(){
-                      ImageDownloader downloader = new ImageDownloader(getContext());
-                      downloader.execute(new Object[]{url.getThumbnail_pic(),imageView,urls.length,0});
-                  }
-                };
-                downloadThread.start();
                 count++;
             }
         }
@@ -506,8 +527,9 @@ class ImageDownloader extends AsyncTask<Object,Bitmap,Bitmap>{
     }
     @Override
     protected Bitmap doInBackground(Object... params) {
+        URL myFileURL = null;
         try{
-            URL myFileURL = new URL(params[0].toString());
+            myFileURL = new URL(params[0].toString());
             if(!params[0].toString().toLowerCase().endsWith(".gif")) {
                 myFileURL = new URL(params[0].toString().replace("thumbnail", "bmiddle"));
                 isGif = false;
@@ -552,19 +574,23 @@ class ImageDownloader extends AsyncTask<Object,Bitmap,Bitmap>{
         }catch(Exception e){
             e.printStackTrace();
         }
-        return null;
+        File resultFile = new File(WeiwaApplication.CacheCategory, WeiwaApplication.getFileName(myFileURL));
+        return BitmapFactory.decodeFile(resultFile.getAbsolutePath());
     }
 
     @Override
     protected void onPostExecute(Bitmap result) {
+        if (result == null) {
+            return;
+        }
         if(downloadType==IMAGE) {
             if (count == 1) {
-                if(isGif){
-                    view.getLayoutParams().width = (mDisplayMetrics.widthPixels - divider) / 2;
-                } else{
-                    view.getLayoutParams().width = mDisplayMetrics.widthPixels - divider;
+                view.getLayoutParams().width = mDisplayMetrics.widthPixels - divider;
+                if (result.getHeight() > GL11.GL_MAX_TEXTURE_SIZE) {
+                    view.setScaleType(ImageView.ScaleType.CENTER_CROP);
+                } else {
+                    view.setScaleType(ImageView.ScaleType.FIT_CENTER);
                 }
-                view.setScaleType(ImageView.ScaleType.FIT_CENTER);
             } else if (count == 2) {
                 view.getLayoutParams().width = (mDisplayMetrics.widthPixels - divider) / 2;
                 view.setScaleType(ImageView.ScaleType.CENTER_CROP);
@@ -574,6 +600,9 @@ class ImageDownloader extends AsyncTask<Object,Bitmap,Bitmap>{
                 }
                 view.getLayoutParams().width = (mDisplayMetrics.widthPixels - divider) / 3;
                 view.setScaleType(ImageView.ScaleType.CENTER_CROP);
+            }
+            if (result.getHeight() > GL11.GL_MAX_TEXTURE_SIZE) {
+                Log.e("s", "s");
             }
             view.setImageBitmap(result);
         }else if(downloadType==PORTRAIT){

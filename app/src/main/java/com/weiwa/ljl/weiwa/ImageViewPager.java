@@ -1,21 +1,17 @@
 package com.weiwa.ljl.weiwa;
 
 import android.content.Context;
-import android.graphics.Bitmap;
 import android.net.Uri;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.AttributeSet;
-import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 
-import java.net.MalformedURLException;
+import com.diegocarloslima.byakugallery.lib.TouchImageView;
+
 import java.util.ArrayList;
-
-import uk.co.senab.photoview.PhotoViewAttacher;
 
 /**
  * Created by hzfd on 2017/2/15.
@@ -91,9 +87,8 @@ public class ImageViewPager extends ViewPager {
 
             @Override
             public Object instantiateItem(ViewGroup container, int position) {
-                ImageView imageView = new ImageView(mContext);
-                imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.WRAP_CONTENT,ViewGroup.LayoutParams.WRAP_CONTENT));
-                imageView.setAdjustViewBounds(true);
+                TouchImageView imageView = new TouchImageView(mContext);
+                imageView.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 container.addView(imageView);
                 //container.setLayoutParams(new ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.WRAP_CONTENT));
                 mListener.onDownload(mUris[position],imageView);
