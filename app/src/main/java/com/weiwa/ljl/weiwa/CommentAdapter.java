@@ -1,26 +1,13 @@
 package com.weiwa.ljl.weiwa;
 
 import android.app.Fragment;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
-import android.os.AsyncTask;
 import android.support.v7.widget.RecyclerView;
-import android.util.DisplayMetrics;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.weiwa.ljl.weiwa.WeiboModel.WeiboCommentPojo;
-
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 
 /**
  * Created by hzfd on 2017/2/8.
@@ -62,7 +49,7 @@ public class CommentAdapter extends RecyclerView.Adapter {
 class CommentViewHolder extends RecyclerView.ViewHolder{
 
     Fragment mContext;
-    ImageView comment_portrait;
+    PortraitView comment_portrait;
     TextView comment_name;
     TextView comment_date;
     TextView comment_text;
@@ -72,7 +59,7 @@ class CommentViewHolder extends RecyclerView.ViewHolder{
         comment_date = (TextView) itemView.findViewById(R.id.weibo_date);
         comment_name = (TextView) itemView.findViewById(R.id.single_user);
         comment_text = (TextView) itemView.findViewById(R.id.comment_text);
-        comment_portrait = (ImageView) itemView.findViewById(R.id.single_user_portrait);
+        comment_portrait = (PortraitView) itemView.findViewById(R.id.single_user_portrait);
         mContext = context;
     }
 
@@ -80,7 +67,6 @@ class CommentViewHolder extends RecyclerView.ViewHolder{
         comment_name.setText(comment.getUser().getName());
         comment_date.setText(comment.getCreated_at());
         comment_text.setText(comment.getText());
-        ImageDownloader downloaderRetweet = new ImageDownloader(mContext);
-        downloaderRetweet.execute(new Object[]{comment.getUser().getProfile_image_url(),comment_portrait,1,1});
+        comment_portrait.addDownloadTask(comment.getUser().getProfile_image_url(), 1, 1);
     }
 }

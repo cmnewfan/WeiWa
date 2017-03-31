@@ -11,6 +11,7 @@ import java.net.URL;
  */
 public class WeiwaApplication {
     public static File CacheCategory = new File(Environment.getExternalStorageDirectory().getAbsolutePath()+"/Weiwa");
+    public static File CachePortrait = new File(CacheCategory.getAbsolutePath() + "/Portrait");
 
     public static String getFileName(Uri uri){
         String uri_string = uri.toString();

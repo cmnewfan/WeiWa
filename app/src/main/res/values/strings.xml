@@ -6,6 +6,7 @@
     <string name="comment">  评论数:</string>
     <string name="comment_this">评论此微博</string>
     <string name="repost_this">转发此微博</string>
+    <string name="share_this">分享此微博</string>
     <string name="upload">发布微博</string>
     <!-- TODO: Remove or change this placeholder text -->
     <string name="hello_blank_fragment">Hello blank fragment</string>

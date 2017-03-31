@@ -304,12 +304,8 @@ public class ImageFragment extends Fragment {
                 float ratio = (((float) newWidth) / ((float) newBitmap.getWidth()));
                 imageView.setMaxScale(ratio);
                 TileBitmapDrawable.attachTileBitmapDrawable(imageView, result.getAbsolutePath(), null, null);
-                try {
-                    Runtime.getRuntime().exec("adb shell input tap 100 100");
-                    Runtime.getRuntime().exec("adb shell input tap 100 100");
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                imageView.performClick();
+                imageView.performClick();
                 //imageView.invalidate();
                 //int w1 = result.getWidth();
                 //float ratio = (float)imageView.getWidth()/(float)(attacher.getImageView().getDrawable().getIntrinsicWidth());

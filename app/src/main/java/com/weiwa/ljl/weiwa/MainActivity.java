@@ -238,8 +238,10 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(getApplicationContext(), "再次点击后退键退出程序", Toast.LENGTH_SHORT).show();
                 } else if (event.getRepeatCount() == 0 && back_count == 1) {
                     back_count--;
-                    System.exit(0);
-                    android.os.Process.killProcess(android.os.Process.myPid());
+                    Intent intent = new Intent(getApplicationContext(), SplashActivity.class);
+                    intent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                    intent.putExtra("EXIT", true);
+                    startActivity(intent);
                 }
             } else{
                 popBack();

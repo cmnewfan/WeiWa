@@ -13,4 +13,9 @@
         android:orderInCategory="100"
         android:title="@string/repost_this"
         app:showAsAction="never"/>
+    <item
+        android:id="@+id/share_this"
+        android:orderInCategory="100"
+        android:title="@string/share_this"
+        app:showAsAction="never" />
 </menu>

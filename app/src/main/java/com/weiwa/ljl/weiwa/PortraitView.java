@@ -49,7 +49,7 @@ public class PortraitView extends ImageView {
 
     public void addDownloadTask(String downloadUrl, int downloadCount, int downloadType) {
         DownloadHelper downloadHelper = new DownloadHelper();
-        downloadHelper.execute(new Object[]{downloadUrl, downloadCount, downloadType});
+        downloadHelper.executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, new Object[]{downloadUrl, downloadCount, downloadType});
     }
 
     public void setData(MainActivity context, WeiboPojo.User user){
@@ -87,10 +87,19 @@ public class PortraitView extends ImageView {
             mDisplayMetrics = getResources().getDisplayMetrics();
         }
 
-        private File getCachedImage(String name) {
-            if (WeiwaApplication.CacheCategory.exists()) {
+        private File getCachedImage(String name, int downloadType) {
+            File targetCategory = null;
+            switch (downloadType) {
+                case PORTRAIT:
+                    targetCategory = WeiwaApplication.CachePortrait;
+                    break;
+                case IMAGE:
+                    targetCategory = WeiwaApplication.CacheCategory;
+                    break;
+            }
+            if (targetCategory.exists()) {
                 for (File file :
-                        WeiwaApplication.CacheCategory.listFiles()) {
+                        targetCategory.listFiles()) {
                     String fileName = file.getName();
                     if (fileName.equals(name)) {
                         return file;
@@ -123,7 +132,7 @@ public class PortraitView extends ImageView {
                 count = (int) params[1];
                 downloadType = (int) params[2];
                 //if image cached
-                File cachedFile = getCachedImage(WeiwaApplication.getFileName(myFileURL));
+                File cachedFile = getCachedImage(WeiwaApplication.getFileName(myFileURL), downloadType);
                 if (cachedFile != null) {
                     Bitmap bitmap = BitmapFactory.decodeFile(cachedFile.getAbsolutePath());
                     return bitmap;
@@ -139,8 +148,16 @@ public class PortraitView extends ImageView {
                 //这句可有可无，没有影响
                 //conn.connect();
                 //得到数据流
+                File downloadFile = null;
+                switch (downloadType) {
+                    case PORTRAIT:
+                        downloadFile = new File(WeiwaApplication.CachePortrait, WeiwaApplication.getFileName(myFileURL));
+                        break;
+                    case IMAGE:
+                        downloadFile = new File(WeiwaApplication.CacheCategory, WeiwaApplication.getFileName(myFileURL));
+                        break;
+                }
                 InputStream is = conn.getInputStream();
-                File downloadFile = new File(WeiwaApplication.CacheCategory, WeiwaApplication.getFileName(myFileURL));
                 OutputStream os = new FileOutputStream(downloadFile);
                 int bytesRead = 0;
                 byte[] buffer = new byte[8192];
@@ -156,8 +173,7 @@ public class PortraitView extends ImageView {
             } catch (Exception e) {
                 e.printStackTrace();
             }
-            File resultFile = new File(WeiwaApplication.CacheCategory, WeiwaApplication.getFileName(myFileURL));
-            return BitmapFactory.decodeFile(resultFile.getAbsolutePath());
+            return null;
         }
 
         @Override
