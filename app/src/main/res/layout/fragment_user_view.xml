@@ -3,7 +3,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    tools:context="com.weiwa.ljl.weiwa.UserViewFragment">
+    tools:context="com.weiwa.ljl.weiwa.fragment.UserViewFragment">
 
     <!-- TODO: Update blank fragment layout -->
     <TextView

@@ -14,6 +14,15 @@
         <item name="android:windowDisablePreview">true</item>
     </style>
 
+    <style name="AppTheme.NavigationViewNoActionBar">
+        <item name="windowActionBar">false</item>
+        <item name="windowNoTitle">true</item>
+        <item name="android:windowDisablePreview">true</item>
+        <item name="android:statusBarColor">@android:color/transparent</item>
+        <item name="android:windowTranslucentStatus">true</item>
+        <item name="android:windowDrawsSystemBarBackgrounds">true</item>
+    </style>
+
     <style name="Theme.AppStartLoadTranslucent" parent="android:Theme.Holo.Light">
         <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowNoTitle">true</item>

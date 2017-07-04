@@ -16,7 +16,8 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:orientation="horizontal">
-        <com.weiwa.ljl.weiwa.PortraitView
+
+        <com.weiwa.ljl.weiwa.view.CirclePortraitView
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:paddingLeft="5dp"
@@ -79,7 +80,8 @@
         android:layout_width="match_parent"
         android:layout_height="60dp"
         android:orientation="horizontal">
-        <com.weiwa.ljl.weiwa.PortraitView
+
+        <com.weiwa.ljl.weiwa.view.CirclePortraitView
             android:layout_width="60dp"
             android:layout_height="60dp"
             android:paddingLeft="5dp"

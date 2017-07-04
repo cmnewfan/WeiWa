@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="me.ykrank.s1next.view.internal.DrawerLayoutDelegateConcrete">
+    <!-- we do not care about menu icon colors because drawer have already tinted these icons -->
+    <item
+        android:title="我的微博"
+        android:id="@+id/my" />
+    <item
+        android:title="\@我的"
+        android:id="@+id/atme" />
+    <item
+        android:title="我的关注"
+        android:id="@+id/follow" />
+    <item
+        android:title="我的收藏"
+        android:id="@+id/favourite" />
+    <item
+        android:title="我的粉丝"
+        android:id="@+id/fans" />
+</menu>

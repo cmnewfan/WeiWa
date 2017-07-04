@@ -9,6 +9,6 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:background="@drawable/splash_background"
     android:theme="@style/Theme.AppStartLoadTranslucent"
-    tools:context="com.weiwa.ljl.weiwa.SplashActivity">
+    tools:context="com.weiwa.ljl.weiwa.activity.SplashActivity">
 
 </RelativeLayout>
