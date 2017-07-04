@@ -1,11 +1,11 @@
 package com.weiwa.ljl.weiwa.view
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.BitmapFactory
 import android.util.AttributeSet
 import com.weiwa.ljl.weiwa.BitmapDownloadHelper
 import com.weiwa.ljl.weiwa.WeiwaApplication
-import com.weiwa.ljl.weiwa.activity.MainActivity
 import com.weiwa.ljl.weiwa.network.WeiboPojo
 import de.hdodenhof.circleimageview.CircleImageView
 import kotlinx.coroutines.experimental.CommonPool
@@ -18,7 +18,7 @@ import java.net.URL
 
 class CirclePortraitView : CircleImageView {
     private var mUser: WeiboPojo.User? = null
-    private var instance: MainActivity? = null
+    private var instance: Activity? = null
 
     constructor(context: Context) : super(context) {}
 
@@ -26,7 +26,8 @@ class CirclePortraitView : CircleImageView {
 
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {}
 
-    fun addDownloadTask(downloadUrl: String) {
+    fun addDownloadTask(downloadUrl: String, context: Activity, user: WeiboPojo.User) {
+        setData(context, user)
         async(CommonPool) {
             var myFileURL: URL? = null
             try {
@@ -53,7 +54,7 @@ class CirclePortraitView : CircleImageView {
         }
     }
 
-    fun setData(context: MainActivity, user: WeiboPojo.User) {
+    private fun setData(context: Activity, user: WeiboPojo.User) {
         instance = context
         mUser = user
         /*setOnClickListener(new OnClickListener() {

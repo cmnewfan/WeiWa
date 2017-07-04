@@ -45,7 +45,7 @@ class EditFragment : Fragment() {
 
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle): View? {
+                              savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_edit, container, false)
         addCamera.setOnClickListener {

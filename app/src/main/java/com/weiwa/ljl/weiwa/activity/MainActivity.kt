@@ -6,15 +6,10 @@ import android.content.Intent
 import android.graphics.Paint
 import android.os.AsyncTask
 import android.os.Bundle
-import android.support.design.widget.FloatingActionButton
-import android.support.design.widget.NavigationView
-import android.support.v4.widget.DrawerLayout
 import android.support.v7.app.AppCompatActivity
-import android.support.v7.widget.Toolbar
 import android.util.Log
 import android.view.*
 import android.view.animation.AnimationUtils
-import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import com.bumptech.glide.GlideBuilder
@@ -34,6 +29,7 @@ import com.weiwa.ljl.weiwa.network.WeiboClient
 import com.weiwa.ljl.weiwa.network.WeiboCommentPojo
 import com.weiwa.ljl.weiwa.network.WeiboPojo
 import com.weiwa.ljl.weiwa.view.CirclePortraitView
+import kotlinx.android.synthetic.main.activity_main.*
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import retrofit2.Call
@@ -53,15 +49,10 @@ class MainActivity : AppCompatActivity() {
     private var weibo_user_max_id: String? = null
     private var isLastOne = false
     private var mLastClick = 0.0.toLong()
-    private val GettingComment = Any()
-    private var add: ImageButton? = null
-    private var upload: ImageButton? = null
-    private var toolbar: Toolbar? = null
     private var isUserLastOne = false
     private var mScreenName: TextView? = null
     private var mDescription: TextView? = null
     private var mLocation: TextView? = null
-    private var mPortrait: CirclePortraitView? = null
     private var currentWeibo: WeiboPojo? = null
     private val userWeibo: WeiboPojo? = null
     private var lastWeibo: WeiboPojo? = null
@@ -70,9 +61,6 @@ class MainActivity : AppCompatActivity() {
     private var onUserWeiboListener: onUserWeiboListener? = null
     private var onUserUpdatedListener: OnUserUpdatedListener? = null
     private var mMainFragment: MainFragment? = null
-    private var mDrawerLayout: DrawerLayout? = null
-    private var fab: FloatingActionButton? = null
-    private var mNavigationView: NavigationView? = null
     private var apiStores: WeiboClient.ApiStores? = null
     private val fabStatus = Stack<Boolean>()
 
@@ -81,21 +69,18 @@ class MainActivity : AppCompatActivity() {
         setContentView(R.layout.activity_main)
         initDrawerLayout()
         setSupportActionBar(toolbar)
-        fab = findViewById(R.id.fab) as FloatingActionButton
         val animation = AnimationUtils.loadAnimation(this, R.anim.rotate_anim)
-        fab!!.setOnClickListener {
+        fab.setOnClickListener {
             //get the latest data
-            fab!!.startAnimation(animation)
+            fab.startAnimation(animation)
             weibo_max_id = null
             getWeiboData(WEIBO_GET_NEW, null)
         }
         //init Image Button
-        add = findViewById(R.id.add) as ImageButton
-        upload = findViewById(R.id.edit) as ImageButton
-        upload!!.setOnClickListener {
+        edit.setOnClickListener {
             val editFragment = EditFragment()
-            add!!.visibility = View.VISIBLE
-            upload!!.visibility = View.GONE
+            add.visibility = View.VISIBLE
+            edit.visibility = View.GONE
             editFragment.setOnPost(object : onPost {
                 override fun post(content: String) {
                     update(content, null, 0, WEIBO_UPDATE_NO_PIC)
@@ -114,40 +99,36 @@ class MainActivity : AppCompatActivity() {
                 .setDecodeFormat(DecodeFormat.PREFER_ARGB_8888)
         mMainFragment = MainFragment()
         setDefaultFragment()
-        fab!!.startAnimation(animation)
+        fab.startAnimation(animation)
         getUserinfo(MainActivity.uid)
         getWeiboData(WEIBO_GET_NEW, null)
     }
 
     private fun initDrawerLayout() {
-        toolbar = findViewById(R.id.toolbar) as Toolbar
-        mDrawerLayout = findViewById(R.id.drawer_layout) as DrawerLayout
-        mPortrait = findViewById(R.id.portrait) as CirclePortraitView
-        mPortrait!!.setOnClickListener {
-            if (!mDrawerLayout!!.isDrawerOpen(mNavigationView!!)) {
-                mDrawerLayout!!.openDrawer(Gravity.START)
+        portrait.setOnClickListener {
+            if (!drawer_layout.isDrawerOpen(navigation_view)) {
+                drawer_layout.openDrawer(Gravity.START)
             } else {
-                mDrawerLayout!!.closeDrawers()
+                drawer_layout.closeDrawers()
             }
         }
-        mNavigationView = findViewById(R.id.navigation_view) as NavigationView
-        mNavigationView!!.setNavigationItemSelectedListener { item ->
+        navigation_view.setNavigationItemSelectedListener { item ->
             when (item.itemId) {
                 R.id.my -> {
                     getWeiboData(WEIBO_GET_USER, null)
-                    mDrawerLayout!!.closeDrawers()
+                    drawer_layout.closeDrawers()
                 }
                 R.id.atme -> {
                     getWeiboData(WEIBO_GET_ATME, null)
-                    mDrawerLayout!!.closeDrawers()
+                    drawer_layout.closeDrawers()
                 }
-                else -> mDrawerLayout!!.closeDrawers()
+                else -> drawer_layout.closeDrawers()
             }
             true
         }
-        mScreenName = mNavigationView!!.getHeaderView(0).findViewById(R.id.screen_name) as TextView
-        mLocation = mNavigationView!!.getHeaderView(0).findViewById(R.id.location) as TextView
-        mDescription = mNavigationView!!.getHeaderView(0).findViewById(R.id.description) as TextView
+        mScreenName = navigation_view.getHeaderView(0).findViewById(R.id.screen_name) as TextView
+        mLocation = navigation_view.getHeaderView(0).findViewById(R.id.location) as TextView
+        mDescription = navigation_view.getHeaderView(0).findViewById(R.id.description) as TextView
     }
 
     fun setOnWeiboPOJOUpdated(listener: onWeiboUpdatedListener) {
@@ -166,25 +147,25 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun setOnAddButtonClickListener(listener: View.OnClickListener) {
-        add!!.setOnClickListener(listener)
+        add.setOnClickListener(listener)
     }
 
     fun popBack() {
-        if (fragmentManager!!.findFragmentById(R.id.main_fragment) is UserWeiboFragment) {
+        if (fragmentManager.findFragmentById(R.id.main_fragment) is UserWeiboFragment) {
             this.onUserWeiboListener = null
         }
-        fragmentManager!!.popBackStack()
-        add!!.visibility = View.GONE
-        upload!!.visibility = View.VISIBLE
-        if (fragmentManager!!.findFragmentById(R.id.main_fragment).isHidden) {
-            fragmentManager!!.beginTransaction().show(fragmentManager!!.findFragmentById(R.id.main_fragment)).commit()
+        fragmentManager.popBackStack()
+        add.visibility = View.GONE
+        edit.visibility = View.VISIBLE
+        if (fragmentManager.findFragmentById(R.id.main_fragment).isHidden) {
+            fragmentManager.beginTransaction().show(fragmentManager.findFragmentById(R.id.main_fragment)).commit()
         }
         if (fabStatus.size > 1) {
             fabStatus.pop()
             if (fabStatus.lastElement()) {
-                fab!!.visibility = View.VISIBLE
+                fab.visibility = View.VISIBLE
             } else {
-                fab!!.visibility = View.GONE
+                fab.visibility = View.GONE
             }
         }
     }
@@ -202,8 +183,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun setDefaultFragment() {
-        val ss = mMainFragment!!.javaClass.canonicalName
-        val fragmentTransaction = fragmentManager!!.beginTransaction()
+        val fragmentTransaction = fragmentManager.beginTransaction()
         fragmentTransaction.add(R.id.main_fragment, mMainFragment)
         fragmentTransaction.addToBackStack(null)
         fragmentTransaction.commit()
@@ -213,47 +193,47 @@ class MainActivity : AppCompatActivity() {
     fun setFragment(fragment: Fragment) {
         when (fragment.javaClass.canonicalName) {
             "com.weiwa.ljl.weiwa.fragment.UserViewFragment" -> {
-                fab!!.visibility = View.VISIBLE
+                fab.visibility = View.VISIBLE
                 fabStatus.push(true)
-                add!!.visibility = View.GONE
-                upload!!.visibility = View.VISIBLE
+                add.visibility = View.GONE
+                edit.visibility = View.VISIBLE
             }
             "com.weiwa.ljl.weiwa.fragment.EditFragment" -> {
-                add!!.visibility = View.VISIBLE
-                upload!!.visibility = View.GONE
-                fab!!.visibility = View.GONE
+                add.visibility = View.VISIBLE
+                edit.visibility = View.GONE
+                fab.visibility = View.GONE
                 fabStatus.push(false)
             }
             "com.weiwa.ljl.weiwa.fragment.WeiboCommentFragment", "com.weiwa.ljl.weiwa.fragment.WeiboRetweetCommentFragment" -> {
-                if (getFragmentManager().findFragmentById(R.id.main_fragment) !is MainFragment) {
+                if (fragmentManager.findFragmentById(R.id.main_fragment) !is MainFragment) {
                     return
                 }
-                if (getFragmentManager().findFragmentById(R.id.main_fragment) is UserWeiboFragment) {
+                if (fragmentManager.findFragmentById(R.id.main_fragment) is UserWeiboFragment) {
                     return
                 }
-                fab!!.visibility = View.GONE
+                fab.visibility = View.GONE
                 fabStatus.push(false)
-                add!!.visibility = View.GONE
-                upload!!.visibility = View.VISIBLE
+                add.visibility = View.GONE
+                edit.visibility = View.VISIBLE
             }
             "com.weiwa.ljl.weiwa.fragment.UserWeiboFragment" -> {
-                if (getFragmentManager().findFragmentById(R.id.main_fragment) is UserWeiboFragment) {
+                if (fragmentManager.findFragmentById(R.id.main_fragment) is UserWeiboFragment) {
                     return
                 }
-                fab!!.visibility = View.GONE
+                fab.visibility = View.GONE
                 fabStatus.push(false)
-                add!!.visibility = View.GONE
-                upload!!.visibility = View.VISIBLE
+                add.visibility = View.GONE
+                edit.visibility = View.VISIBLE
             }
             else -> {
                 fab!!.visibility = View.GONE
                 fabStatus.push(false)
-                add!!.visibility = View.GONE
-                upload!!.visibility = View.VISIBLE
+                add.visibility = View.GONE
+                edit.visibility = View.VISIBLE
             }
         }
-        val fragmentTransaction = getFragmentManager().beginTransaction()
-        fragmentTransaction.hide(getFragmentManager().findFragmentById(R.id.main_fragment))
+        val fragmentTransaction = fragmentManager.beginTransaction()
+        fragmentTransaction.hide(fragmentManager.findFragmentById(R.id.main_fragment))
         fragmentTransaction.add(R.id.main_fragment, fragment)
         fragmentTransaction.addToBackStack(null)
         fragmentTransaction.commit()
@@ -270,7 +250,6 @@ class MainActivity : AppCompatActivity() {
         // automatically handle clicks on the Home/Up button, so long
         // weibo_drawable you specify a parent activity in AndroidManifest.xml.
         val id = item.itemId
-
         when (id) {
             R.id.action_settings -> {
                 initAuth()
@@ -281,19 +260,18 @@ class MainActivity : AppCompatActivity() {
                 ClearTask().execute(0)
             }
         }
-
         return super.onOptionsItemSelected(item)
     }
 
     override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
         if (keyCode == KeyEvent.KEYCODE_BACK) {
-            if (fragmentManager!!.backStackEntryCount == 1) {
+            if (fragmentManager.backStackEntryCount == 1) {
                 if (workMode == WEIBO_GET_USER || workMode == WEIBO_GET_ATME) {
                     onWeiboPOJOUpdated!!.onUpdate(lastWeibo!!, WEIBO_GET_NEW)
                     workMode = WEIBO_GET_NEW
                     return true
                 }
-                fab!!.visibility = View.VISIBLE
+                fab.visibility = View.VISIBLE
                 if (event.repeatCount == 0 && back_count == 0) {
                     back_count++
                     backLastClick = System.currentTimeMillis()
@@ -324,9 +302,9 @@ class MainActivity : AppCompatActivity() {
         mDescription!!.paintFlags = mDescription!!.paintFlags or Paint.UNDERLINE_TEXT_FLAG
         mLocation!!.text = user.location
         mLocation!!.paintFlags = mLocation!!.paintFlags or Paint.UNDERLINE_TEXT_FLAG
-        mPortrait!!.addDownloadTask(user.profile_image_url!!)
-        val circlePortraitView = mNavigationView!!.getHeaderView(0).findViewById(R.id.portrait) as CirclePortraitView
-        circlePortraitView.addDownloadTask(user.profile_image_url!!)
+        portrait.addDownloadTask(user.profile_image_url!!, this@MainActivity, user)
+        val circlePortraitView = navigation_view.getHeaderView(0).findViewById(R.id.portrait) as CirclePortraitView
+        circlePortraitView.addDownloadTask(user.profile_image_url!!, this@MainActivity, user)
     }
 
     fun getWeiboComment(id: String) {
@@ -410,7 +388,7 @@ class MainActivity : AppCompatActivity() {
     }
 
     fun stopAnimation() {
-        fab!!.clearAnimation()
+        fab.clearAnimation()
     }
 
     /**

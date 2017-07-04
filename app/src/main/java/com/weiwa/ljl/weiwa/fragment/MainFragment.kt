@@ -63,22 +63,19 @@ class MainFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle): View? {
+                              savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         //init AdapterEvent for adater calling comment or repost
         onNeedInsert = object : onAdapterEvent {
             override fun onNeedInsert() {
                 (activity as MainActivity).getWeiboData()
             }
-
             override fun onComment(content: String, id: String) {
                 (activity as MainActivity).createComment(id, content)
             }
-
             override fun onNeedComment(id: String) {
                 (activity as MainActivity).getWeiboComment(id)
             }
-
             override fun onRepost(content: String, id: String) {
                 (activity as MainActivity).createRepost(id, content)
             }

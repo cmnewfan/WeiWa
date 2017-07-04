@@ -9,7 +9,6 @@ import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import com.weiwa.ljl.weiwa.R
-import com.weiwa.ljl.weiwa.activity.MainActivity
 import com.weiwa.ljl.weiwa.listener.onAdapterEvent
 import com.weiwa.ljl.weiwa.network.WeiboPojo
 import com.weiwa.ljl.weiwa.view.CirclePortraitView
@@ -76,15 +75,13 @@ class Retweeted_ViewHolder : CustomViewHolder {
             popupMenu.show()
         }
         this.retweeted_user.text = statuses.retweeted_status!!.user!!.name
-        retweet_user_portrait.setData(context!!.activity as MainActivity, statuses.getUser())
-        retweeted_user_portrait.setData(context!!.activity as MainActivity, statuses.retweeted_status!!.user!!)
-        this.retweet_user_portrait.addDownloadTask(statuses.getUser().profile_image_url!!)
-        this.retweeted_user_portrait.addDownloadTask(statuses.retweeted_status!!.user!!.profile_image_url!!)
+        this.retweet_user_portrait.addDownloadTask(statuses.getUser().profile_image_url!!, context!!.activity, statuses.getUser())
+        this.retweeted_user_portrait.addDownloadTask(statuses.retweeted_status!!.user!!.profile_image_url!!, context!!.activity, statuses.retweeted_status!!.user!!)
         refreshImage(statuses.retweeted_status!!.pic_urls!!, statuses.retweeted_status!!.convertToUris(), this.retweeted_line_1, this.retweeted_line_2, this.retweeted_line_3)
     }
 
     fun setUser(repostUser: WeiboPojo.User, repostedUser: WeiboPojo.User) {
-        retweeted_user_portrait.setData(context!!.activity as MainActivity, repostedUser)
-        retweet_user_portrait.setData(context!!.activity as MainActivity, repostUser)
+        //retweeted_user_portrait.setData(context!!.activity as MainActivity, repostedUser)
+        //retweet_user_portrait.setData(context!!.activity as MainActivity, repostUser)
     }
 }

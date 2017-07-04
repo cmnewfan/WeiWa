@@ -23,7 +23,8 @@ class SplashActivity : Activity() {
                 WeiwaApplication.CachePortrait.mkdir()
             }
             val intent = Intent()
-            intent.setClass(this, MainActivity::class.java)
+            intent.setClass(this@SplashActivity, MainActivity::class.java)
+            //intent.setClass(this, MainActivity::class.java)
             val thread = object : Thread() {
                 override fun run() {
                     try {

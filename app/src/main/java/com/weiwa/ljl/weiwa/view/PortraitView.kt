@@ -1,5 +1,6 @@
 package com.weiwa.ljl.weiwa.view
 
+import android.app.Activity
 import android.content.Context
 import android.graphics.Bitmap
 import android.graphics.BitmapFactory
@@ -8,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import com.weiwa.ljl.weiwa.BitmapDownloadHelper
 import com.weiwa.ljl.weiwa.WeiwaApplication
-import com.weiwa.ljl.weiwa.activity.MainActivity
 import com.weiwa.ljl.weiwa.network.WeiboPojo
 import kotlinx.coroutines.experimental.CommonPool
 import kotlinx.coroutines.experimental.async
@@ -20,23 +20,24 @@ import javax.microedition.khronos.opengles.GL11
  */
 class PortraitView : ImageView {
     private var mUser: WeiboPojo.User? = null
-    private var instance: MainActivity? = null
+    private var instance: Activity? = null
 
     constructor(context: Context, user: WeiboPojo.User) : super(context) {
-        instance = context as MainActivity
+        instance = context as Activity
         mUser = user
     }
 
     constructor(context: Context, downloadUrl: String, downloadCount: Int, downloadType: Int) : super(context) {
-        instance = context as MainActivity
-        addDownloadTask(downloadUrl, downloadCount, downloadType)
+        instance = context as Activity
+        addDownloadTask(downloadUrl, downloadCount, downloadType, instance!!, null)
     }
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {}
 
     constructor(context: Context, attrs: AttributeSet, defStyleAttr: Int) : super(context, attrs, defStyleAttr) {}
 
-    fun addDownloadTask(downloadUrl: String, downloadCount: Int, downloadType: Int) {
+    fun addDownloadTask(downloadUrl: String, downloadCount: Int, downloadType: Int, context: Activity, user: WeiboPojo.User?) {
+        setData(context, user)
         async(CommonPool) {
             var myFileURL: URL? = null
             var isGif: Boolean? = null
@@ -91,7 +92,7 @@ class PortraitView : ImageView {
         }
     }
 
-    fun setData(context: MainActivity, user: WeiboPojo.User) {
+    private fun setData(context: Activity, user: WeiboPojo.User?) {
         instance = context
         mUser = user
         /*setOnClickListener(new OnClickListener() {

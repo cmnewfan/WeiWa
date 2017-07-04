@@ -52,7 +52,7 @@ class WeiboCommentFragment : Fragment() {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
-                              savedInstanceState: Bundle): View? {
+                              savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_weibo_comment_single, container, false)
         val holder = SingleWB_ViewHolder(mView!!, this@WeiboCommentFragment, object : onAdapterEvent {

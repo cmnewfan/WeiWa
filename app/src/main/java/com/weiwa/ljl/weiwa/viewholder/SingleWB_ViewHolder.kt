@@ -10,7 +10,6 @@ import android.widget.GridLayout
 import android.widget.ImageButton
 import android.widget.TextView
 import com.weiwa.ljl.weiwa.R
-import com.weiwa.ljl.weiwa.activity.MainActivity
 import com.weiwa.ljl.weiwa.listener.onAdapterEvent
 import com.weiwa.ljl.weiwa.network.WeiboPojo
 import com.weiwa.ljl.weiwa.view.CirclePortraitView
@@ -71,8 +70,7 @@ class SingleWB_ViewHolder : CustomViewHolder {
 
     fun refresh(statuses: WeiboPojo.Statuses) {
         user_name.text = statuses.getUser().name
-        user_portrait.setData(context!!.activity as MainActivity, statuses.getUser())
-        user_portrait.addDownloadTask(statuses.getUser().profile_image_url!!)
+        user_portrait.addDownloadTask(statuses.getUser().profile_image_url!!, context!!.activity, statuses.getUser())
         text.text = statuses.text
         date.text = statuses.created_at
         repost.text = statuses.reposts_count
@@ -91,6 +89,6 @@ class SingleWB_ViewHolder : CustomViewHolder {
     }
 
     fun setUser(wUser: WeiboPojo.User) {
-        user_portrait.setData(context!!.activity as MainActivity, wUser)
+        //user_portrait.setData(context!!.activity as MainActivity, wUser)
     }
 }

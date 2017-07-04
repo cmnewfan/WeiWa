@@ -4,9 +4,7 @@ import android.app.Fragment
 import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.widget.TextView
-
 import com.weiwa.ljl.weiwa.R
-import com.weiwa.ljl.weiwa.activity.MainActivity
 import com.weiwa.ljl.weiwa.network.WeiboCommentPojo
 import com.weiwa.ljl.weiwa.view.PortraitView
 
@@ -31,7 +29,6 @@ class CommentViewHolder(itemView: View, internal var mContext: Fragment) : Recyc
         comment_name.text = comment.user!!.name
         comment_date.text = comment.created_at
         comment_text.text = comment.text
-        comment_portrait.setData(mContext.activity as MainActivity, comment.user!!)
-        comment_portrait.addDownloadTask(comment.user!!.profile_image_url!!, 1, 1)
+        comment_portrait.addDownloadTask(comment.user!!.profile_image_url!!, 1, 1, mContext.activity, comment.user!!)
     }
 }
