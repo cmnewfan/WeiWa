@@ -69,8 +69,8 @@ class SingleWB_ViewHolder : CustomViewHolder {
     }
 
     fun refresh(statuses: WeiboPojo.Statuses) {
-        user_name.text = statuses.getUser().name
-        user_portrait.addDownloadTask(statuses.getUser().profile_image_url!!, context!!.activity, statuses.getUser())
+        user_name.text = statuses.user!!.name
+        user_portrait.addDownloadTask(statuses.user!!.profile_image_url!!, context!!.activity, statuses.user!!)
         text.text = statuses.text
         date.text = statuses.created_at
         repost.text = statuses.reposts_count

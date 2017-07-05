@@ -118,10 +118,17 @@ class WeiboPojo {
 
         var is_show_bulletin: String? = null
 
-        private var user: User? = null
+        var user: User? = null
+            get() {
+                if (field != null) {
+                    return field
+                } else {
+                    return User()
+                }
+            }
 
         fun convertToUris(): Array<Uri>? {
-            if (this.pic_urls != null && this.pic_urls!!.size > 0) {
+            if (this.pic_urls != null && this.pic_urls!!.isNotEmpty()) {
                 val tUris = arrayOfNulls<Uri>(this.pic_urls!!.size)
                 for (i in 0..this.pic_urls!!.size - 1) {
                     tUris[i] = this.pic_urls!![i]!!.convertToUri()
@@ -130,18 +137,6 @@ class WeiboPojo {
             } else {
                 return null
             }
-        }
-
-        fun getUser(): User {
-            if (user != null) {
-                return user!!
-            } else {
-                return User()
-            }
-        }
-
-        fun setUser(user: User) {
-            this.user = user
         }
 
         override fun toString(): String {
@@ -395,7 +390,7 @@ class WeiboPojo {
             }
 
         fun convertToUris(): Array<Uri>? {
-            if (this.pic_urls != null && this.pic_urls!!.size > 0) {
+            if (this.pic_urls != null && this.pic_urls!!.isNotEmpty()) {
                 return pic_urls!!.map { it!!.convertToUri() }.toTypedArray()
             } else {
                 return null

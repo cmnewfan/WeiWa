@@ -92,7 +92,6 @@ class ImageFragment : Fragment() {
                 } catch (e: MalformedURLException) {
                     e.printStackTrace()
                 }
-
             }
         }, currentIndex)
         mViewPager!!.addOnPageChangeListener(object : ViewPager.OnPageChangeListener {
@@ -194,8 +193,6 @@ class ImageFragment : Fragment() {
                 conn.doInput = true
                 //不使用缓存
                 conn.useCaches = false
-                //这句可有可无，没有影响
-                //conn.connect();
                 //得到数据流
                 val `is` = conn.inputStream
                 downloadFile = File(downloadCategory, WeiwaApplication.getFileName(url!!))
@@ -209,7 +206,7 @@ class ImageFragment : Fragment() {
                 if (read > count) {
                     read = count
                 }
-                while (`is`.read(buffer, offset, read) != -1) {
+                while ({ bytesRead = `is`.read(buffer, offset, read); bytesRead }() != -1) {
                     os.write(buffer, offset, bytesRead)
                     offset += bytesRead
                     if (`is`.available() != 0) {

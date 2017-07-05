@@ -63,7 +63,6 @@ open class CustomViewHolder : RecyclerView.ViewHolder {
             e.printStackTrace()
             return null
         }
-
     }
 
     fun getBitmapFromView(view: View): Bitmap {
@@ -91,9 +90,9 @@ open class CustomViewHolder : RecyclerView.ViewHolder {
     }
 
     open fun refreshImage(urls: Array<WeiboPojo.Pic_urls?>?, convert_uris: Array<Uri>?, line_1: GridLayout, line_2: GridLayout, line_3: GridLayout) {
-        line_1.setVisibility(View.GONE)
-        line_2.setVisibility(View.GONE)
-        line_3.setVisibility(View.GONE)
+        line_1.visibility = View.GONE
+        line_2.visibility = View.GONE
+        line_3.visibility = View.GONE
         line_1.removeAllViews()
         line_2.removeAllViews()
         line_3.removeAllViews()
@@ -107,25 +106,25 @@ open class CustomViewHolder : RecyclerView.ViewHolder {
                     val bundle = Bundle()
                     bundle.putParcelableArray("Uris", convert_uris)
                     bundle.putInt("Index", index)
-                    fragment.setArguments(bundle)
-                    (context!!.getActivity() as MainActivity).setFragment(fragment)
+                    fragment.arguments = bundle
+                    (context!!.activity as MainActivity).setFragment(fragment)
                 }
-                imageView.setLayoutParams(ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT))
+                imageView.layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
                 val view = View(context!!.activity)
-                view.setLayoutParams(ViewGroup.LayoutParams(10, ViewGroup.LayoutParams.MATCH_PARENT))
+                view.layoutParams = ViewGroup.LayoutParams(10, ViewGroup.LayoutParams.MATCH_PARENT)
                 view.background = null
                 if (count < 3) {
                     line_1.addView(imageView)
                     line_1.addView(view)
-                    line_1.setVisibility(View.VISIBLE)
+                    line_1.visibility = View.VISIBLE
                 } else if (count < 6) {
                     line_2.addView(imageView)
                     line_2.addView(view)
-                    line_2.setVisibility(View.VISIBLE)
+                    line_2.visibility = View.VISIBLE
                 } else {
                     line_3.addView(imageView)
                     line_3.addView(view)
-                    line_3.setVisibility(View.VISIBLE)
+                    line_3.visibility = View.VISIBLE
                 }
                 count++
             }
@@ -151,14 +150,14 @@ open class CustomViewHolder : RecyclerView.ViewHolder {
      */
     internal fun createPopupWindow(type: Int, repost_user_name: String?, repost_content: String?, true_id: String?): PopupWindow {
         val popupWindow = PopupWindow()
-        val view = ((context!!.getActivity()
+        val view = ((context!!.activity
                 .getSystemService(Context.LAYOUT_INFLATER_SERVICE)) as LayoutInflater).inflate(R.layout.popup_input, null)
         val confirm = view.findViewById(R.id.confirm) as Button
         val cancel = view.findViewById(R.id.cancel) as Button
         val input = view.findViewById(R.id.input) as EditText
-        input.setFocusable(true)
+        input.isFocusable = true
         input.setOnClickListener { v ->
-            val manager = context!!.getActivity().getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
+            val manager = context!!.activity.getSystemService(INPUT_METHOD_SERVICE) as InputMethodManager
             manager.showSoftInput(v, InputMethodManager.SHOW_FORCED)
             manager.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS)
         }
@@ -171,7 +170,7 @@ open class CustomViewHolder : RecyclerView.ViewHolder {
             input.setHint(R.string.repost_this)
         }
         confirm.setOnClickListener {
-            if (input.getText().length == 0) {
+            if (input.text.length == 0) {
                 if (type == PopupWindow_Comment) {
                     if (true_id != null) {
                         adapterEvent.onComment(context!!.getActivity().getResources().getString(R.string.comment_this), true_id)
@@ -185,35 +184,35 @@ open class CustomViewHolder : RecyclerView.ViewHolder {
                         adapterEvent.onRepost(context!!.getActivity().getResources().getString(R.string.repost_this), id!!)
                     }
                 }
-            } else if (input.getText().length < 140) {
+            } else if (input.text.length < 140) {
                 if (type == PopupWindow_Comment) {
                     if (true_id != null) {
-                        adapterEvent.onComment(input.getText().toString(), true_id)
+                        adapterEvent.onComment(input.text.toString(), true_id)
                     } else {
-                        adapterEvent.onComment(input.getText().toString(), id!!)
+                        adapterEvent.onComment(input.text.toString(), id!!)
                     }
                 } else if (type == PopupWindow_Repost) {
                     if (repost_user_name == null) {
-                        adapterEvent.onRepost(input.getText().toString(), id!!)
+                        adapterEvent.onRepost(input.text.toString(), id!!)
                     } else {
-                        adapterEvent.onRepost(input.getText().toString(), id!!)
+                        adapterEvent.onRepost(input.text.toString(), id!!)
                     }
                 }
             } else {
-                Toast.makeText(context!!.getActivity(), "超出字数限制" + (input.getText().length - 140).toString() + "字", Toast.LENGTH_SHORT).show()
+                Toast.makeText(context!!.activity, "超出字数限制" + (input.text.length - 140).toString() + "字", Toast.LENGTH_SHORT).show()
             }
             popupWindow.dismiss()
         }
         cancel.setOnClickListener {
             popupWindow.dismiss()
         }
-        popupWindow.setContentView(view)
-        popupWindow.setWidth(ViewGroup.LayoutParams.MATCH_PARENT)
-        popupWindow.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT)
-        popupWindow.setFocusable(true)
-        popupWindow.setBackgroundDrawable(context!!.getActivity().getResources().getDrawable(R.drawable.popupwindow_drawable))
+        popupWindow.contentView = view
+        popupWindow.width = ViewGroup.LayoutParams.MATCH_PARENT
+        popupWindow.height = ViewGroup.LayoutParams.WRAP_CONTENT
+        popupWindow.isFocusable = true
+        popupWindow.setBackgroundDrawable(context!!.activity.resources.getDrawable(R.drawable.popupwindow_drawable))
         popupWindow.setTouchInterceptor { v, event ->
-            if (event.getAction() == MotionEvent.ACTION_OUTSIDE) {
+            if (event.action == MotionEvent.ACTION_OUTSIDE) {
                 if (popupWindow != null && popupWindow.isShowing()) {
                     popupWindow.dismiss()
                 }

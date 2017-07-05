@@ -29,7 +29,7 @@ class CirclePortraitView : CircleImageView {
     fun addDownloadTask(downloadUrl: String, context: Activity, user: WeiboPojo.User) {
         setData(context, user)
         async(CommonPool) {
-            var myFileURL: URL? = null
+            var myFileURL: URL?
             try {
                 myFileURL = URL(downloadUrl)
                 if (!downloadUrl.toLowerCase().endsWith(".gif")) {

@@ -39,13 +39,11 @@ class PortraitView : ImageView {
     fun addDownloadTask(downloadUrl: String, downloadCount: Int, downloadType: Int, context: Activity, user: WeiboPojo.User?) {
         setData(context, user)
         async(CommonPool) {
-            var myFileURL: URL? = null
-            var isGif: Boolean? = null
+            var myFileURL: URL?
             try {
                 myFileURL = URL(downloadUrl)
                 if (!downloadUrl.toLowerCase().endsWith(".gif")) {
                     myFileURL = URL(downloadUrl.replace("thumbnail", "bmiddle"))
-                    isGif = false
                 }
                 //if image cached
                 val cachedFile = BitmapDownloadHelper.getCachedImage(WeiwaApplication.getFileName(myFileURL), downloadType)

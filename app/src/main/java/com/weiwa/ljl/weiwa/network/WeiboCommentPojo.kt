@@ -29,9 +29,9 @@ class WeiboCommentPojo protected constructor(`in`: Parcel) : Parcelable {
     init {
         val bundle = `in`?.readBundle()
         if (bundle?.getString("RetweetedPortrait", "") == "") {
-            status!!.getUser().profile_image_url = bundle.getString("RetweetPortrait")
+            status!!.user!!.profile_image_url = bundle.getString("RetweetPortrait")
             status!!.created_at = bundle.getString("RetweetDate")
-            status!!.getUser().name = bundle.getString("RetweetUser")
+            status!!.user!!.name = bundle.getString("RetweetUser")
             status!!.text = bundle.getString("RetweetText")
             status!!.comments_count = bundle.getString("CommentCount")
             status!!.reposts_count = bundle.getString("RepostCount")
@@ -43,9 +43,9 @@ class WeiboCommentPojo protected constructor(`in`: Parcel) : Parcelable {
             status!!.retweeted_status!!.user!!.profile_image_url = "RetweetedPortrait"
             status!!.retweeted_status!!.user!!.name = "RetweetedUser"
             status!!.retweeted_status!!.text = "RetweetedText"
-            status!!.getUser().profile_image_url = bundle.getString("RetweetPortrait")
+            status!!.user!!.profile_image_url = bundle.getString("RetweetPortrait")
             status!!.created_at = bundle.getString("RetweetDate")
-            status!!.getUser().name = bundle.getString("RetweetUser")
+            status!!.user!!.name = bundle.getString("RetweetUser")
             status!!.text = bundle.getString("RetweetText")
             status!!.comments_count = bundle.getString("CommentCount")
             status!!.reposts_count = bundle.getString("RepostCount")
@@ -133,16 +133,16 @@ class WeiboCommentPojo protected constructor(`in`: Parcel) : Parcelable {
             bundle.putString("RetweetedUser", status!!.retweeted_status!!.user!!.name)
             bundle.putString("RetweetedText", status!!.retweeted_status!!.text)
             bundle.putStringArray("RetweetedPic", getPic_urls(status!!.retweeted_status!!.pic_urls))
-            bundle.putString("RetweetPortrait", status!!.getUser().profile_image_url)
+            bundle.putString("RetweetPortrait", status!!.user!!.profile_image_url)
             bundle.putString("RetweetDate", status!!.created_at)
-            bundle.putString("RetweetUser", status!!.getUser().name)
+            bundle.putString("RetweetUser", status!!.user!!.name)
             bundle.putString("RetweetText", status!!.text)
             bundle.putString("CommentCount", status!!.comments_count)
             bundle.putString("RepostCount", status!!.reposts_count)
         } else {
-            bundle.putString("RetweetPortrait", status!!.getUser().profile_image_url)
+            bundle.putString("RetweetPortrait", status!!.user!!.profile_image_url)
             bundle.putString("RetweetDate", status!!.created_at)
-            bundle.putString("RetweetUser", status!!.getUser().name)
+            bundle.putString("RetweetUser", status!!.user!!.name)
             bundle.putString("RetweetText", status!!.text)
             bundle.putStringArray("RetweetPic", getPic_urls(status!!.pic_urls))
             bundle.putString("CommentCount", status!!.comments_count)

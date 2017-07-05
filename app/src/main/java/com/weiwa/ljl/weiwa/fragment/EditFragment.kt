@@ -105,13 +105,8 @@ class EditFragment : Fragment() {
             val bufferSize = 1024 * 8
             val buffer = ByteArray(bufferSize)
             var len = 0
-            while (true) {
-                len = fis.read(buffer)
-                if (len == -1) {
-                    break
-                } else {
-                    byteBuffer.write(buffer, 0, len)
-                }
+            while (fis.read(buffer) != -1) {
+                byteBuffer.write(buffer, 0, len)
             }
             pic = byteBuffer.toByteArray()
         } catch (e: FileNotFoundException) {

@@ -51,7 +51,7 @@ class Retweeted_ViewHolder : CustomViewHolder {
         retweet_text.text = statuses.text
         retweeted_date.text = statuses.retweeted_status!!.created_at
         retweeted_text.text = statuses.retweeted_status!!.text
-        retweet_user.text = statuses.getUser().name
+        retweet_user.text = statuses.user!!.name
         option.setOnClickListener {
             val popupMenu = PopupMenu(context!!.activity, option)
             popupMenu.inflate(R.menu.menu_weibo)
@@ -62,7 +62,6 @@ class Retweeted_ViewHolder : CustomViewHolder {
                     R.id.share_this -> {
                         val targetUri = getUriOfBitmap(getBitmapFromView(mParentView!!))
                         val sendIntent = Intent(Intent.ACTION_SEND)
-                        //set intent type
                         sendIntent.type = "image/*"
                         sendIntent.putExtra(Intent.EXTRA_STREAM, targetUri)
                         sendIntent.putExtra(Intent.EXTRA_SUBJECT, "分享")
@@ -75,7 +74,7 @@ class Retweeted_ViewHolder : CustomViewHolder {
             popupMenu.show()
         }
         this.retweeted_user.text = statuses.retweeted_status!!.user!!.name
-        this.retweet_user_portrait.addDownloadTask(statuses.getUser().profile_image_url!!, context!!.activity, statuses.getUser())
+        this.retweet_user_portrait.addDownloadTask(statuses.user!!.profile_image_url!!, context!!.activity, statuses.user!!)
         this.retweeted_user_portrait.addDownloadTask(statuses.retweeted_status!!.user!!.profile_image_url!!, context!!.activity, statuses.retweeted_status!!.user!!)
         refreshImage(statuses.retweeted_status!!.pic_urls!!, statuses.retweeted_status!!.convertToUris(), this.retweeted_line_1, this.retweeted_line_2, this.retweeted_line_3)
     }

@@ -65,14 +65,14 @@ class WeiboAdapter(private var weibo_data: WeiboPojo?, private val mContext: Fra
                 val single_item = holder as SingleWB_ViewHolder
                 single_item.refresh(weibo_data!!.statuses!![position])
                 single_item.setId(weibo_data!!.statuses!![position].id!!)
-                single_item.setUser(weibo_data!!.statuses!![position].getUser())
+                single_item.setUser(weibo_data!!.statuses!![position].user!!)
             }
             RETWEETED_WB -> {
                 val retweet_item = holder as Retweeted_ViewHolder
                 retweet_item.refresh(weibo_data!!.statuses!![position])
                 retweet_item.setRetweetId(weibo_data!!.statuses!![position].id!!)
                 retweet_item.setId(weibo_data!!.statuses!![position].retweeted_status!!.id!!)
-                retweet_item.setUser(weibo_data!!.statuses!![position].getUser(), weibo_data!!.statuses!![position].retweeted_status!!.user!!)
+                retweet_item.setUser(weibo_data!!.statuses!![position].user!!, weibo_data!!.statuses!![position].retweeted_status!!.user!!)
             }
             else -> {
             }

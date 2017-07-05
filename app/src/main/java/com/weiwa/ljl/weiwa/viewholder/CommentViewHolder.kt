@@ -13,17 +13,10 @@ import com.weiwa.ljl.weiwa.view.PortraitView
  */
 
 class CommentViewHolder(itemView: View, internal var mContext: Fragment) : RecyclerView.ViewHolder(itemView) {
-    internal var comment_portrait: PortraitView
-    internal var comment_name: TextView
-    internal var comment_date: TextView
-    internal var comment_text: TextView
-
-    init {
-        comment_date = itemView.findViewById(R.id.weibo_date) as TextView
-        comment_name = itemView.findViewById(R.id.single_user) as TextView
-        comment_text = itemView.findViewById(R.id.comment_text) as TextView
-        comment_portrait = itemView.findViewById(R.id.single_user_portrait) as PortraitView
-    }
+    private var comment_portrait: PortraitView = itemView.findViewById(R.id.single_user_portrait) as PortraitView
+    private var comment_name: TextView = itemView.findViewById(R.id.single_user) as TextView
+    private var comment_date: TextView = itemView.findViewById(R.id.weibo_date) as TextView
+    private var comment_text: TextView = itemView.findViewById(R.id.comment_text) as TextView
 
     fun refresh(comment: WeiboCommentPojo.Comments) {
         comment_name.text = comment.user!!.name

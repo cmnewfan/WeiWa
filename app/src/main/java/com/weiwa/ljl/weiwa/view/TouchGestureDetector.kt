@@ -13,11 +13,10 @@ import android.view.ScaleGestureDetector
 
 class TouchGestureDetector(context: Context, listener: OnTouchGestureListener) {
 
-    private val mGestureDetector: GestureDetectorCompat
+    private val mGestureDetector: GestureDetectorCompat = GestureDetectorCompat(context, listener)
     private val mScaleGestureDetector: ScaleGestureDetector
 
     init {
-        mGestureDetector = GestureDetectorCompat(context, listener)
         mGestureDetector.setOnDoubleTapListener(listener)
         mScaleGestureDetector = ScaleGestureDetector(context, listener)
         ScaleGestureDetectorCompat.setQuickScaleEnabled(mScaleGestureDetector, false)

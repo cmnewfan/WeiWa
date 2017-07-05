@@ -4,7 +4,6 @@ import android.app.Activity
 import android.app.Fragment
 import android.content.Intent
 import android.graphics.Paint
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -30,6 +29,8 @@ import com.weiwa.ljl.weiwa.network.WeiboCommentPojo
 import com.weiwa.ljl.weiwa.network.WeiboPojo
 import com.weiwa.ljl.weiwa.view.CirclePortraitView
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.experimental.CommonPool
+import kotlinx.coroutines.experimental.async
 import okhttp3.MediaType
 import okhttp3.MultipartBody
 import retrofit2.Call
@@ -257,7 +258,17 @@ class MainActivity : AppCompatActivity() {
             }
             R.id.clear_cache -> {
                 Toast.makeText(this, "开始清除缓存", Toast.LENGTH_SHORT).show()
-                ClearTask().execute(0)
+                async(CommonPool) {
+                    if (WeiwaApplication.CacheCategory.exists()) {
+                        val files = WeiwaApplication.CacheCategory.listFiles()
+                        for (file in files) {
+                            file.delete()
+                        }
+                    }
+                    runOnUiThread {
+                        Toast.makeText(this@MainActivity, "已经清除完毕", Toast.LENGTH_SHORT).show()
+                    }
+                }
             }
         }
         return super.onOptionsItemSelected(item)
@@ -572,23 +583,6 @@ class MainActivity : AppCompatActivity() {
     interface onPost {
         fun post(content: String)
         fun post(content: String, pic: ByteArray)
-    }
-
-    internal inner class ClearTask : AsyncTask<Any, Any, Any>() {
-
-        override fun doInBackground(vararg params: Any): Any? {
-            if (WeiwaApplication.CacheCategory.exists()) {
-                val files = WeiwaApplication.CacheCategory.listFiles()
-                for (file in files) {
-                    file.delete()
-                }
-            }
-            return null
-        }
-
-        override fun onPostExecute(result: Any) {
-            Toast.makeText(this@MainActivity, "已经清除完毕", Toast.LENGTH_SHORT).show()
-        }
     }
 
     companion object {
