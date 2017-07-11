@@ -74,9 +74,14 @@ class Retweeted_ViewHolder : CustomViewHolder {
             popupMenu.show()
         }
         this.retweeted_user.text = statuses.retweeted_status!!.user!!.name
-        this.retweet_user_portrait.addDownloadTask(statuses.user!!.profile_image_url!!, context!!.activity, statuses.user!!)
-        this.retweeted_user_portrait.addDownloadTask(statuses.retweeted_status!!.user!!.profile_image_url!!, context!!.activity, statuses.retweeted_status!!.user!!)
-        refreshImage(statuses.retweeted_status!!.pic_urls!!, statuses.retweeted_status!!.convertToUris(), this.retweeted_line_1, this.retweeted_line_2, this.retweeted_line_3)
+        if (statuses.retweeted_status!!.user!!.profile_image_url != null) {
+            this.retweeted_user_portrait.addDownloadTask(statuses.retweeted_status!!.user!!.profile_image_url!!, context!!.activity, statuses.retweeted_status!!.user!!)
+        }
+        if (statuses.user!!.profile_image_url != null) {
+            this.retweet_user_portrait.addDownloadTask(statuses.user!!.profile_image_url!!, context!!.activity, statuses.user!!)
+
+        }
+        refreshImage(statuses.retweeted_status!!.pic_urls, statuses.retweeted_status!!.convertToUris(), this.retweeted_line_1, this.retweeted_line_2, this.retweeted_line_3)
     }
 
     fun setUser(repostUser: WeiboPojo.User, repostedUser: WeiboPojo.User) {
