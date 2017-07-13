@@ -27,6 +27,7 @@ import com.diegocarloslima.byakugallery.lib.TileBitmapDrawable
 import com.wang.avi.AVLoadingIndicatorView
 import com.weiwa.ljl.weiwa.R
 import com.weiwa.ljl.weiwa.WeiwaApplication
+import com.weiwa.ljl.weiwa.network.NetworkBroadcastReceiver
 import com.weiwa.ljl.weiwa.view.ImageViewPager
 import com.weiwa.ljl.weiwa.view.TouchImageView
 import uk.co.senab.photoview.PhotoViewAttacher
@@ -145,6 +146,15 @@ class ImageFragment : Fragment() {
             })
             Glide.with(this).load(targetUri).diskCacheStrategy(DiskCacheStrategy.SOURCE).fitCenter().into(imageViewTarget)
         } else {
+            if (!NetworkBroadcastReceiver.getWifiState()) {
+                imageView.setImageDrawable(this.activity.getDrawable(R.drawable.ic_wait_for_download))
+                imageView.setOnClickListener {
+                    val bitmapDownloader = BitmapDownloader()
+                    //current item position is used to display progress of item downloading
+                    bitmapDownloader.execute(*arrayOf(URL(targetUri.toString()), imageView, mViewPager!!.currentItem))
+                }
+                return
+            }
             val bitmapDownloader = BitmapDownloader()
             //current item position is used to display progress of item downloading
             bitmapDownloader.execute(*arrayOf(URL(targetUri.toString()), imageView, mViewPager!!.currentItem))
@@ -227,7 +237,6 @@ class ImageFragment : Fragment() {
             } catch (ex: Exception) {
                 ex.printStackTrace()
             }
-
             return null
         }
 

@@ -66,6 +66,9 @@ class PortraitView : ImageView {
 
     fun setImage(result: Bitmap, downloadType: Int, count: Int) {
         val divider = 100
+        if (layoutParams == null) {
+            layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
+        }
         if (downloadType == BitmapDownloadHelper.IMAGE) {
             if (count == 1) {
                 layoutParams.width = resources.displayMetrics.widthPixels - divider
@@ -78,9 +81,6 @@ class PortraitView : ImageView {
                 layoutParams.width = (resources.displayMetrics.widthPixels - divider) / 2
                 scaleType = ImageView.ScaleType.CENTER_CROP
             } else {
-                if (layoutParams == null) {
-                    layoutParams = ViewGroup.LayoutParams(ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT)
-                }
                 layoutParams.width = (resources.displayMetrics.widthPixels - divider) / 3
                 scaleType = ImageView.ScaleType.CENTER_CROP
             }

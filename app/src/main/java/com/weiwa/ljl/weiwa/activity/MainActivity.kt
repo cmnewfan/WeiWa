@@ -3,7 +3,9 @@ package com.weiwa.ljl.weiwa.activity
 import android.app.Activity
 import android.app.Fragment
 import android.content.Intent
+import android.content.IntentFilter
 import android.graphics.Paint
+import android.net.ConnectivityManager
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -23,10 +25,7 @@ import com.weiwa.ljl.weiwa.fragment.UserWeiboFragment
 import com.weiwa.ljl.weiwa.listener.OnUserUpdatedListener
 import com.weiwa.ljl.weiwa.listener.onUserWeiboListener
 import com.weiwa.ljl.weiwa.listener.onWeiboUpdatedListener
-import com.weiwa.ljl.weiwa.network.WeiWaAuthListener
-import com.weiwa.ljl.weiwa.network.WeiboClient
-import com.weiwa.ljl.weiwa.network.WeiboCommentPojo
-import com.weiwa.ljl.weiwa.network.WeiboPojo
+import com.weiwa.ljl.weiwa.network.*
 import com.weiwa.ljl.weiwa.view.CirclePortraitView
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.experimental.CommonPool
@@ -64,12 +63,17 @@ class MainActivity : AppCompatActivity() {
     private var mMainFragment: MainFragment? = null
     private var apiStores: WeiboClient.ApiStores? = null
     private val fabStatus = Stack<Boolean>()
+    private val networkMonitor = NetworkBroadcastReceiver()
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         initDrawerLayout()
         setSupportActionBar(toolbar)
+
+        var filter = IntentFilter(ConnectivityManager.CONNECTIVITY_ACTION);
+        registerReceiver(networkMonitor, filter);
+
         val animation = AnimationUtils.loadAnimation(this, R.anim.rotate_anim)
         fab.setOnClickListener {
             //get the latest data
@@ -293,6 +297,7 @@ class MainActivity : AppCompatActivity() {
                         Toast.makeText(applicationContext, "再次点击后退键退出程序", Toast.LENGTH_SHORT).show()
                     } else {
                         back_count--
+                        unregisterReceiver(networkMonitor);
                         val intent = Intent(applicationContext, SplashActivity::class.java)
                         intent.flags = Intent.FLAG_ACTIVITY_CLEAR_TOP
                         intent.putExtra("EXIT", true)
