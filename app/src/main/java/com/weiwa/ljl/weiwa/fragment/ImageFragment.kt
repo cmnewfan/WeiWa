@@ -128,7 +128,7 @@ class ImageFragment : Fragment() {
                         val outputStream = FileOutputStream(downloadFile!!)
                         var bytesRead = 0
                         val buffer = ByteArray(8192)
-                        while (inputStream.read(buffer, 0, 8192) != -1) {
+                        while ({ bytesRead = inputStream.read(buffer, 0, 8192); bytesRead }() != -1) {
                             outputStream.write(buffer, 0, bytesRead)
                         }
                         inputStream.close()

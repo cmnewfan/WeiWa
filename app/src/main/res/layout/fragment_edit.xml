@@ -1,4 +1,4 @@
-<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
@@ -23,39 +23,38 @@
             android:layout_height="20dp"/>
         <LinearLayout
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:orientation="horizontal"
+            android:layout_height="50dp"
+            android:id="@+id/edit_fragment_button_layout"
             android:layout_below="@id/blank">
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_weight="1">
-                <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/camera"
-                    android:background="@android:drawable/ic_menu_camera" />
-            </LinearLayout>
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:gravity="center"
-                android:layout_weight="1">
-                <ImageButton
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:id="@+id/upload_confirm"
-                    android:background="@android:drawable/ic_menu_gallery"/>
-            </LinearLayout>
 
+            <ImageButton
+                android:id="@+id/edit_fragment_camera"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:background="@null"
+                android:clickable="true"
+                android:src="@android:drawable/ic_menu_camera" />
+
+            <ImageButton
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_gravity="center"
+                android:layout_weight="1"
+                android:visibility="gone"
+                android:id="@+id/edit_fragment_image"
+                android:clickable="true"
+                android:src="@android:drawable/ic_menu_gallery"
+                android:background="@null" />
         </LinearLayout>
+
 
         <com.weiwa.ljl.weiwa.view.TouchImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:id="@+id/selectImage"
-            android:layout_below="@id/blank" />
+            android:layout_below="@id/edit_fragment_button_layout" />
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -72,8 +71,5 @@
                 android:id="@+id/hint"
                 android:text="还可输入140字" />
         </RelativeLayout>
-
     </RelativeLayout>
-
-
-</FrameLayout>
+</RelativeLayout>

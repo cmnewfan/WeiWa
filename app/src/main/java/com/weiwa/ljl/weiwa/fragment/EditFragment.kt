@@ -16,10 +16,8 @@ import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import com.weiwa.ljl.weiwa.R
-import com.weiwa.ljl.weiwa.WeiwaApplication
 import com.weiwa.ljl.weiwa.activity.MainActivity
 import java.io.ByteArrayOutputStream
-import java.io.File
 import java.io.FileNotFoundException
 import java.io.IOException
 
@@ -33,8 +31,8 @@ class EditFragment : Fragment() {
     private var mView: View? = null
     private val editText: EditText by lazy { mView!!.findViewById(R.id.editor) as EditText }
     private val hint: TextView by lazy { mView!!.findViewById(R.id.hint) as TextView }
-    private val addImage: ImageButton by lazy { mView!!.findViewById(R.id.upload_confirm) as ImageButton }
-    private val addCamera: ImageButton by lazy { mView!!.findViewById(R.id.camera) as ImageButton }
+    internal val addImage: ImageButton by lazy { mView!!.findViewById(R.id.edit_fragment_image) as ImageButton }
+    internal val addCamera: ImageButton by lazy { mView!!.findViewById(R.id.edit_fragment_camera) as ImageButton }
     private val image: com.weiwa.ljl.weiwa.view.TouchImageView by lazy { mView!!.findViewById(R.id.selectImage) as com.weiwa.ljl.weiwa.view.TouchImageView }
     private var pic: ByteArray? = null
     private var imageUri: Uri? = null
@@ -43,18 +41,17 @@ class EditFragment : Fragment() {
         onpost = post
     }
 
-
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
         // Inflate the layout for this fragment
         mView = inflater.inflate(R.layout.fragment_edit, container, false)
         addCamera.setOnClickListener {
             // 设定action和miniType
-            val intent = Intent(MediaStore.ACTION_IMAGE_CAPTURE)
-            val photo = File(WeiwaApplication.CacheCategory, "Pic.jpg")
-            intent.putExtra(MediaStore.EXTRA_OUTPUT,
-                    Uri.fromFile(photo))
-            imageUri = Uri.fromFile(photo)
+            val intent = Intent()
+            intent.action = Intent.ACTION_PICK
+            intent.type = "image/*"
+            intent.putExtra("return-data", true)
+            // 以需要返回值的模式开启一个Activity
             startActivityForResult(intent, Activity.RESULT_FIRST_USER)
         }
         editText.addTextChangedListener(object : TextWatcher {
@@ -70,15 +67,6 @@ class EditFragment : Fragment() {
                 hint.text = "还可输入" + (140 - editText!!.text.length) + "字"
             }
         })
-        addImage.setOnClickListener {
-            // 设定action和miniType
-            val intent = Intent()
-            intent.action = Intent.ACTION_PICK
-            intent.type = "image/*"
-            intent.putExtra("return-data", true)
-            // 以需要返回值的模式开启一个Activity
-            startActivityForResult(intent, Activity.RESULT_FIRST_USER)
-        }
         (activity as MainActivity).setOnAddButtonClickListener(View.OnClickListener {
             if (pic == null) {
                 onpost!!.post(editText.text.toString())
@@ -95,8 +83,10 @@ class EditFragment : Fragment() {
         val uri: Uri
         if (data != null && data.data != null) {
             uri = data.data
-        } else {
+        } else if (imageUri != null) {
             uri = imageUri!!
+        } else {
+            return
         }
         try {
             image.setImageBitmap(MediaStore.Images.Media.getBitmap(activity.contentResolver, uri))
@@ -105,7 +95,7 @@ class EditFragment : Fragment() {
             val bufferSize = 1024 * 8
             val buffer = ByteArray(bufferSize)
             var len = 0
-            while (fis.read(buffer) != -1) {
+            while ({ len = fis.read(buffer);len }() != -1) {
                 byteBuffer.write(buffer, 0, len)
             }
             pic = byteBuffer.toByteArray()
